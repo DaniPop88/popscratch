@@ -1,27 +1,25 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import logo from '../assets/images/logo.png';
-
-// Import icon components
 import TicketIcon from './icons/TicketIcon';
 import ProfileIcon from './icons/ProfileIcon';
 
 function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const isAuthenticated = false; // Replace with actual auth logic
-
+  // Mock authenticated state (replace with actual auth check)
+  const isAuthenticated = true;
+  
   return (
     <header className="bg-pop-dark-900 border-b border-gray-800 sticky top-0 z-10">
       <div className="container mx-auto px-4 py-3">
         <div className="flex justify-between items-center">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
-            <img src={logo} alt="PopScratch Logo" className="h-8 w-auto" />
-            <span className="text-pop-green-500 text-2xl font-display font-bold">
+          <Link to="/" className="flex items-center">
+            <img src="/assets/images/logo.png" alt="PopScratch" className="h-8 mr-2" />
+            <span className="text-pop-green-500 text-2xl font-bold">
               Pop<span className="text-white">Scratch</span>
             </span>
           </Link>
-
+          
           {/* Mobile menu button */}
           <button 
             onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -35,7 +33,7 @@ function Header() {
               )}
             </svg>
           </button>
-
+          
           {/* Desktop navigation */}
           <nav className="hidden md:flex items-center space-x-6">
             <Link to="/" className="text-white hover:text-pop-green-500 transition-colors">
@@ -51,9 +49,9 @@ function Header() {
                   <ProfileIcon className="w-5 h-5 mr-1" />
                   Perfil
                 </Link>
-                <button className="btn-primary py-2 px-4">
+                <Link to="/dashboard" className="btn-primary py-2 px-4">
                   Obter Tickets
-                </button>
+                </Link>
               </>
             ) : (
               <Link to="/login" className="btn-primary py-2 px-4">
@@ -62,7 +60,7 @@ function Header() {
             )}
           </nav>
         </div>
-
+        
         {/* Mobile menu */}
         {isMenuOpen && (
           <nav className="md:hidden mt-4 pb-2 flex flex-col space-y-3">
