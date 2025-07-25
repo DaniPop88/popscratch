@@ -12,7 +12,7 @@ function ScratchCardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
-  // Memilih cover kartu secara random - BAGIAN INI YANG DITANYAKAN
+  // Memilih cover kartu secara random
   const randomCardNumber = Math.floor(Math.random() * 6) + 1;
   const coverImage = `/assets/images/cards/cover-${randomCardNumber}.png`;
   const scratchPattern = '/assets/images/cards/scratch-pattern.png';
@@ -137,10 +137,17 @@ function ScratchCardPage() {
       }
     };
     
+    // Di bagian revealAll function di ScratchCardPage.jsx
     const revealAll = () => {
       // Clear the entire canvas to reveal prize
       ctx.globalCompositeOperation = 'destination-out';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // Play confetti animation if prize is valuable
+      if (prize && prize.value >= 10) {
+        // Show confetti
+        document.getElementById('confetti-container').classList.remove('hidden');
+      }
       
       // Submit result to backend
       submitResult();
