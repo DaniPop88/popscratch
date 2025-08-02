@@ -58,8 +58,8 @@ app.use(session({
 // Activity logger middleware
 app.use(logActivity);
 
-// Debug middleware
-app.use(debugMiddleware);
+// Debug middleware - nonaktifkan sementara
+// app.use(debugMiddleware);
 
 // Routes
 app.use('/api/auth', authRoutes);
