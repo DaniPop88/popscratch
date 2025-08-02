@@ -4,8 +4,8 @@
   "description": "A digital scratch card platform where users can redeem tickets earned from POP gaming platforms and win exciting prizes.",
   "main": "server-minimal.js",
   "scripts": {
-    "start": "node server-minimal.js",
-    "dev": "nodemon server-minimal.js"
+    "start": "node server-fixed.js",
+    "dev": "nodemon server-fixed.js"
   },
   "keywords": [],
   "author": "",
