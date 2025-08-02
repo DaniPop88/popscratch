@@ -65,14 +65,10 @@ app.use(debugMiddleware);
 app.use('/api/auth', authRoutes);
 app.use('/api/tickets', checkAuth, ticketRoutes);
 app.use('/api/prizes', checkAuth, prizeRoutes);
-app.use('/api/scratch-cards', scratchCardRoutes); // Hapus checkAuth
+app.use('/api/scratch-cards', scratchCardRoutes);
 app.use('/api/admin', checkAuth, adminRoutes);
 
-// PERBAIKAN: Ganti route dengan 'https://git.new/' menjadi path normal
-// Dari yang terlihat di screenshot ada route seperti app.get('https://git.new/'...)
-// Ubah menjadi:
 app.get('/git-new', (req, res) => {
-    // Handler code
     res.send('Git new route');
 });
 
