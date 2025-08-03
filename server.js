@@ -27,15 +27,15 @@ mongoose.connect(process.env.MONGODB_URI, {
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, 'public')));
 
-// Tambahkan middleware untuk memperbaiki MIME Type CSS
-app.use((req, res, next) => {
-  if (req.path.endsWith('.css')) {
-    res.type('text/css');
-  }
+// Tambahkan ini sebelum route lainnya
+app.use('/css', (req, res, next) => {
+  res.type('text/css');
   next();
 });
+
+// Pastikan static files dikonfigurasi dengan benar
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Session configuration
 app.use(session({
