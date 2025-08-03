@@ -1,129 +1,235 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>POP Scratch - Digital Scratch Cards</title>
-    <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>POP Scratch Card - Raspadinha Digital</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- Telegram Login Widget -->
     <script src="https://telegram.org/js/telegram-widget.js?22"></script>
 </head>
 <body>
-    <div class="app-container">
-        <!-- Header -->
-        <header>
-            <div class="logo">
-                <img src="images/logo.png" alt="POP Scratch Logo">
+    <!-- Header -->
+    <header class="app-header">
+        <div class="logo">
+            <img src="images/logo.png" alt="POP Scratch" width="100" height="36">
+        </div>
+        <div class="user-area" id="userArea">
+            <button id="loginBtn" class="btn-login">
+                <i class="fab fa-telegram"></i> Login
+            </button>
+            <div id="userInfo" class="user-info hidden">
+                <img id="userAvatar" src="" alt="User Avatar">
+                <span id="userName"></span>
+                <span class="tickets-count">
+                    <i class="fas fa-ticket-alt"></i> <span id="ticketsCount">0</span>
+                </span>
             </div>
-            <div class="user-area" id="userArea">
-                <button id="loginBtn" class="login-btn">
-                    <i class="fab fa-telegram"></i> Login via Telegram
-                </button>
-                <div id="userInfo" class="user-info hidden">
-                    <img id="userAvatar" src="" alt="User Avatar">
-                    <span id="userName"></span>
-                    <span class="tickets-count">
-                        <i class="fas fa-ticket-alt"></i> <span id="ticketsCount">0</span>
-                    </span>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Welcome Section (For Non-logged Users) -->
+        <section id="welcomeSection" class="welcome-section">
+            <!-- Main Banner -->
+            <div class="main-banner">
+                <img src="images/main-banner.jpg" alt="Ganhe Prêmios Incríveis!">
+            </div>
+
+            <!-- Winners Carousel -->
+            <div class="winners-carousel">
+                <div class="carousel-container">
+                    <div class="carousel-item">
+                        <span class="winner-icon">🏆</span>
+                        <span class="winner-text">@pedro ganhou <b>iPhone 15</b></span>
+                    </div>
+                    <div class="carousel-item">
+                        <span class="winner-icon">💰</span>
+                        <span class="winner-text">@maria ganhou <b>R$3000</b></span>
+                    </div>
+                    <div class="carousel-item">
+                        <span class="winner-icon">🎁</span>
+                        <span class="winner-text">@carlos ganhou <b>AirPods</b></span>
+                    </div>
+                    <div class="carousel-item">
+                        <span class="winner-icon">💎</span>
+                        <span class="winner-text">@ana ganhou <b>Smart TV</b></span>
+                    </div>
                 </div>
             </div>
-        </header>
 
-        <!-- Main Content Area -->
-        <main>
-            <!-- Welcome Section (For Non-logged Users) -->
-            <section id="welcomeSection" class="welcome-section">
+            <div class="welcome-message">
                 <h1>Selamat Datang di POP Scratch!</h1>
                 <p>Gosok kartu digital dan menangkan hadiah menarik!</p>
                 <button id="loginBtnWelcome" class="login-btn-large">
                     <i class="fab fa-telegram"></i> Login via Telegram
                 </button>
-            </section>
+            </div>
+        </section>
 
-            <!-- Dashboard Section (For Logged Users) -->
-            <section id="dashboardSection" class="dashboard-section hidden">
-                <div class="actions-panel">
-                    <button id="getTicketBtn" class="action-btn get-ticket-btn">
-                        <i class="fas fa-ticket-alt"></i> DAPATKAN TIKET
-                    </button>
+        <!-- Dashboard Section (For Logged Users) -->
+        <section id="dashboardSection" class="dashboard-section hidden">
+            <!-- Main Banner for logged users -->
+            <div class="main-banner">
+                <img src="images/vip-banner.jpg" alt="VIP Rewards!">
+            </div>
+
+            <!-- Winners Carousel -->
+            <div class="winners-carousel">
+                <div class="carousel-container">
+                    <div class="carousel-item">
+                        <span class="winner-icon">🏆</span>
+                        <span class="winner-text">@pedro ganhou <b>iPhone 15</b></span>
+                    </div>
+                    <div class="carousel-item">
+                        <span class="winner-icon">💰</span>
+                        <span class="winner-text">@maria ganhou <b>R$3000</b></span>
+                    </div>
+                    <div class="carousel-item">
+                        <span class="winner-icon">🎁</span>
+                        <span class="winner-text">@carlos ganhou <b>AirPods</b></span>
+                    </div>
+                    <div class="carousel-item">
+                        <span class="winner-icon">💎</span>
+                        <span class="winner-text">@ana ganhou <b>Smart TV</b></span>
+                    </div>
                 </div>
-                
-                <div class="scratch-cards-section">
-                    <h2>Pilih Kartu Gosok</h2>
-                    <div class="cards-container">
-                        <div class="card-type">
-                            <h3>Kupon Gosok A</h3>
-                            <p>1 Tiket</p>
-                            <div class="card-image">
-                                <img src="images/card-a.png" alt="Kupon A">
-                            </div>
-                            <button class="play-btn" data-card-type="A" data-ticket-cost="1">
+            </div>
+
+            <!-- Featured Section -->
+            <div class="section-header">
+                <div class="section-title">
+                    <i class="fas fa-star"></i> Kupon Gosok
+                </div>
+                <a href="#" class="section-link" id="getTicketBtn">
+                    <i class="fas fa-ticket-alt"></i> Dapatkan Tiket
+                </a>
+            </div>
+
+            <!-- Game Cards -->
+            <div class="game-cards">
+                <!-- Kupon Gosok A -->
+                <div class="game-card">
+                    <div class="card-badge">HOT</div>
+                    <div class="card-content">
+                        <h3>Kupon Gosok A</h3>
+                        <p>Hadiah hingga R$3000 & Smart Watch</p>
+                        <div class="card-actions">
+                            <button class="btn-play play-btn" data-card-type="A" data-ticket-cost="1">
                                 Mainkan
+                                <span class="ticket-price">1 Tiket</span>
                             </button>
-                        </div>
-                        <div class="card-type">
-                            <h3>Kupon Gosok B</h3>
-                            <p>2 Tiket</p>
-                            <div class="card-image">
-                                <img src="images/card-b.png" alt="Kupon B">
-                            </div>
-                            <button class="play-btn" data-card-type="B" data-ticket-cost="2">
-                                Mainkan
-                            </button>
-                        </div>
-                        <div class="card-type">
-                            <h3>Kupon Gosok C</h3>
-                            <p>5 Tiket</p>
-                            <div class="card-image">
-                                <img src="images/card-c.png" alt="Kupon C">
-                            </div>
-                            <button class="play-btn" data-card-type="C" data-ticket-cost="5">
-                                Mainkan
-                            </button>
+                            <button class="btn-prizes">Ver Prêmios</button>
                         </div>
                     </div>
                 </div>
-                
-                <div class="history-section">
-                    <h2>Riwayat Permainan</h2>
-                    <div class="history-container" id="historyContainer">
-                        <!-- History items will be inserted here -->
-                    </div>
-                </div>
-            </section>
 
-            <!-- Scratch Card Game Area -->
-            <section id="scratchGameSection" class="scratch-game-section hidden">
-                <div class="game-header">
-                    <h2>Gosok Kartu <span id="cardTypeLabel"></span></h2>
-                    <button id="backToDashboard" class="back-btn">
-                        <i class="fas fa-arrow-left"></i> Kembali
-                    </button>
-                </div>
-                
-                <div class="scratch-card-container">
-                    <div class="scratch-card-wrapper">
-                        <div id="scratchInstructions">
-                            <p>Gosok kartu untuk melihat hadiahmu!</p>
-                        </div>
-                        <canvas id="scratchCard" width="300" height="300"></canvas>
-                        <div id="prizeReveal" class="prize-reveal hidden">
-                            <!-- Prize will be revealed here -->
+                <!-- Kupon Gosok B -->
+                <div class="game-card">
+                    <div class="card-badge">NEW</div>
+                    <div class="card-content">
+                        <h3>Kupon Gosok B</h3>
+                        <p>Menangkan iPhone 12 & JBL Speaker!</p>
+                        <div class="card-actions">
+                            <button class="btn-play play-btn" data-card-type="B" data-ticket-cost="2">
+                                Mainkan
+                                <span class="ticket-price">2 Tiket</span>
+                            </button>
+                            <button class="btn-prizes">Ver Prêmios</button>
                         </div>
                     </div>
                 </div>
-            </section>
-        </main>
 
-        <!-- Modals -->
-        <div id="registerGameIdModal" class="modal hidden">
-            <div class="modal-content">
-                <span class="close-modal">&times;</span>
-                <h2>Daftarkan Game ID</h2>
-                <p>Silakan daftarkan ID game Anda dari platform POP pilihan Anda.</p>
-                
+                <!-- Kupon Gosok C -->
+                <div class="game-card">
+                    <div class="card-badge">VIP</div>
+                    <div class="card-content">
+                        <h3>Kupon Gosok C</h3>
+                        <p>Hadiah Besar! PS5 & iPhone 15</p>
+                        <div class="card-actions">
+                            <button class="btn-play play-btn" data-card-type="C" data-ticket-cost="5">
+                                Mainkan
+                                <span class="ticket-price">5 Tiket</span>
+                            </button>
+                            <button class="btn-prizes">Ver Prêmios</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- History Section -->
+            <div class="section-header">
+                <div class="section-title">
+                    <i class="fas fa-history"></i> Riwayat Permainan
+                </div>
+            </div>
+            <div class="history-container" id="historyContainer">
+                <!-- History items will be inserted here -->
+            </div>
+        </section>
+
+        <!-- Scratch Card Game Area -->
+        <section id="scratchGameSection" class="scratch-game-section hidden">
+            <div class="game-header">
+                <button id="backToDashboard" class="back-btn">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h2>Gosok Kartu <span id="cardTypeLabel"></span></h2>
+            </div>
+            
+            <div class="scratch-card-container">
+                <div id="scratchInstructions" class="scratch-instructions">
+                    <p>Gosok kartu untuk melihat hadiahmu!</p>
+                </div>
+                <canvas id="scratchCard" width="300" height="300"></canvas>
+                <div id="prizeReveal" class="prize-reveal hidden">
+                    <!-- Prize will be revealed here -->
+                </div>
+            </div>
+        </section>
+        
+        <!-- Spacing for Bottom Nav -->
+        <div class="bottom-spacing"></div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <a href="#" class="nav-item active" data-section="dashboard">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="#" class="nav-item" data-action="ticket">
+            <i class="fas fa-ticket-alt"></i>
+            <span>Ticket</span>
+        </a>
+        <a href="#" class="nav-item main-action" data-action="register">
+            <div class="action-button">
+                <i class="fas fa-plus"></i>
+            </div>
+            <span>Registrar</span>
+        </a>
+        <a href="#" class="nav-item" data-section="prizes">
+            <i class="fas fa-gift"></i>
+            <span>Prêmios</span>
+        </a>
+        <a href="#" class="nav-item" data-section="profile">
+            <i class="fas fa-user"></i>
+            <span>Perfil</span>
+        </a>
+    </nav>
+
+    <!-- Modals -->
+    <!-- Register Game ID Modal -->
+    <div class="modal" id="registerGameIdModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Daftarkan Game ID</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
                 <form id="gameIdForm">
                     <div class="form-group">
                         <label for="platformSelect">Pilih Platform:</label>
@@ -151,19 +257,20 @@
                         <input type="text" id="gameId" placeholder="Masukkan Game ID" required>
                     </div>
                     
-                    <div class="form-actions">
-                        <button type="submit" class="submit-btn">Daftarkan</button>
-                    </div>
+                    <button type="submit" class="btn-submit">Daftarkan</button>
                 </form>
             </div>
         </div>
+    </div>
         
-        <div id="getTicketModal" class="modal hidden">
-            <div class="modal-content">
-                <span class="close-modal">&times;</span>
-                <h2>Dapatkan Tiket</h2>
-                <p>Pilih platform dan cara mendapatkan tiket:</p>
-                
+    <!-- Get Ticket Modal -->
+    <div class="modal" id="getTicketModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🎟️ Dapatkan Tiket</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
                 <form id="ticketRequestForm">
                     <div class="form-group">
                         <label for="ticketPlatformSelect">Pilih Platform:</label>
@@ -175,37 +282,50 @@
                     
                     <div class="form-group">
                         <label>Pilih Metode:</label>
-                        <div class="ticket-methods">
-                            <div class="ticket-method-option">
-                                <input type="radio" name="ticketMethod" id="methodRecharge" value="recharge">
-                                <label for="methodRecharge">Recharge (Deposit)</label>
+                        <div class="claim-options">
+                            <div class="claim-option">
+                                <input type="radio" id="methodRecharge" name="ticketMethod" value="recharge" checked>
+                                <label for="methodRecharge">
+                                    <i class="fas fa-money-bill-wave"></i>
+                                    <span>Deposit</span>
+                                </label>
                             </div>
-                            <div class="ticket-method-option">
-                                <input type="radio" name="ticketMethod" id="methodVIP" value="vip">
-                                <label for="methodVIP">Level VIP</label>
+                            <div class="claim-option">
+                                <input type="radio" id="methodVIP" name="ticketMethod" value="vip">
+                                <label for="methodVIP">
+                                    <i class="fas fa-crown"></i>
+                                    <span>VIP</span>
+                                </label>
                             </div>
-                            <div class="ticket-method-option">
-                                <input type="radio" name="ticketMethod" id="methodBetting" value="betting">
-                                <label for="methodBetting">Total Betting/Rollover</label>
+                            <div class="claim-option">
+                                <input type="radio" id="methodBetting" name="ticketMethod" value="betting">
+                                <label for="methodBetting">
+                                    <i class="fas fa-dice"></i>
+                                    <span>Betting</span>
+                                </label>
                             </div>
-                            <div class="ticket-method-option">
-                                <input type="radio" name="ticketMethod" id="methodInvite" value="invite">
-                                <label for="methodInvite">Invite Member</label>
+                            <div class="claim-option">
+                                <input type="radio" id="methodInvite" name="ticketMethod" value="invite">
+                                <label for="methodInvite">
+                                    <i class="fas fa-users"></i>
+                                    <span>Invite</span>
+                                </label>
                             </div>
                         </div>
                     </div>
                     
-                    <div id="rechargeFields" class="method-fields hidden">
+                    <!-- Dynamic Fields Containers -->
+                    <div id="rechargeFields" class="method-fields">
                         <div class="form-group">
                             <label for="rechargeAmount">Jumlah Recharge (R$):</label>
-                            <input type="number" id="rechargeAmount" min="50" step="1">
+                            <input type="number" id="rechargeAmount" min="50" step="1" required>
                         </div>
                     </div>
                     
                     <div id="vipFields" class="method-fields hidden">
                         <div class="form-group">
                             <label for="vipLevel">Level VIP yang Dicapai:</label>
-                            <select id="vipLevel">
+                            <select id="vipLevel" required>
                                 <option value="1">VIP 1</option>
                                 <option value="2">VIP 2</option>
                                 <option value="3">VIP 3</option>
@@ -218,83 +338,89 @@
                     <div id="bettingFields" class="method-fields hidden">
                         <div class="form-group">
                             <label for="bettingAmount">Total Betting/Rollover (R$):</label>
-                            <input type="number" id="bettingAmount" min="1000" step="1">
+                            <input type="number" id="bettingAmount" min="1000" step="1" required>
                         </div>
                     </div>
                     
                     <div id="inviteFields" class="method-fields hidden">
                         <div class="form-group">
                             <label for="inviteCount">Jumlah Valid Referral:</label>
-                            <input type="number" id="inviteCount" min="1" step="1">
+                            <input type="number" id="inviteCount" min="1" step="1" required>
                         </div>
                     </div>
                     
-                    <div class="form-actions">
-                        <button type="submit" class="submit-btn">Kirim Permintaan</button>
-                    </div>
+                    <button type="submit" class="btn-submit">Kirim Permintaan</button>
                 </form>
             </div>
         </div>
+    </div>
         
-        <div id="winPrizeModal" class="modal hidden">
-            <div class="modal-content prize-win-content">
-                <span class="close-modal">&times;</span>
-                <div class="prize-header">
-                    <i class="fas fa-trophy prize-icon"></i>
-                    <h2>Selamat!</h2>
+    <!-- Win Prize Modal -->
+    <div class="modal" id="winPrizeModal">
+        <div class="modal-content win-content">
+            <div class="modal-header win-header">
+                <h3>🎉 Selamat!</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body win-body">
+                <div class="win-animation">
+                    <i class="fas fa-trophy win-icon"></i>
                 </div>
-                <p>Kamu memenangkan:</p>
-                <div class="prize-name" id="prizeName"></div>
-                
-                <div class="prize-details">
-                    <p><strong>Status hadiah:</strong> Menunggu Verifikasi</p>
-                    <p><strong>Kode Hadiah:</strong> <span id="prizeCode"></span></p>
+                <h2 class="win-prize" id="prizeName">iPhone 15</h2>
+                <div class="win-details">
+                    <p>Status hadiah:</p>
+                    <div class="win-code" id="prizeCode">Kode: #PS78290A</div>
+                    <p class="win-status">Menunggu Verifikasi</p>
                 </div>
-                
-                <div class="prize-instructions">
-                    <p>Screenshot ini dan kontak admin Sekarang</p>
-                    <a href="https://t.me/BKSPOP" class="contact-btn" target="_blank">
-                        <i class="fab fa-telegram"></i> Hubungi Admin
+                <div class="win-actions">
+                    <a href="https://t.me/BKSPOP" class="btn-claim" target="_blank">
+                        <i class="fab fa-telegram"></i> Klaim Sekarang
                     </a>
+                    <button class="btn-home" id="backToHomeBtn">Kembali ke Beranda</button>
                 </div>
-                
-                <button id="backToHomeBtn" class="back-home-btn">Kembali ke Beranda</button>
             </div>
         </div>
+    </div>
         
-        <div id="loseModal" class="modal hidden">
-            <div class="modal-content lose-content">
-                <span class="close-modal">&times;</span>
-                <div class="lose-header">
-                    <i class="far fa-frown lose-icon"></i>
-                    <h2>Belum Beruntung!</h2>
+    <!-- Lose Modal -->
+    <div class="modal" id="loseModal">
+        <div class="modal-content lose-content">
+            <div class="modal-header">
+                <h3>Belum Beruntung!</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="lose-icon">
+                    <i class="far fa-frown"></i>
                 </div>
                 <p>Maaf, kamu belum berhasil mendapatkan hadiah kali ini.</p>
                 <p>Jangan menyerah, coba lagi di kesempatan berikutnya!</p>
                 
-                <button id="tryAgainBtn" class="try-again-btn">Coba Lagi</button>
+                <button id="tryAgainBtn" class="btn-submit">Coba Lagi</button>
             </div>
         </div>
+    </div>
         
-        <div id="requestSentModal" class="modal hidden">
-            <div class="modal-content request-sent-content">
-                <span class="close-modal">&times;</span>
-                <div class="request-sent-header">
-                    <i class="fas fa-check-circle success-icon"></i>
-                    <h2>Permintaan Terkirim!</h2>
+    <!-- Request Sent Modal -->
+    <div class="modal" id="requestSentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Permintaan Terkirim!</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="success-icon">
+                    <i class="fas fa-check-circle"></i>
                 </div>
                 <p>Permintaan tiket Anda telah terkirim dan sedang menunggu verifikasi oleh admin.</p>
                 <p>Harap tunggu, proses ini biasanya membutuhkan waktu 1-24 jam.</p>
                 
-                <button id="okBtn" class="ok-btn">OK</button>
+                <button id="okBtn" class="btn-submit">OK</button>
             </div>
         </div>
     </div>
 
-    <footer>
-        <p>&copy; 2025 POP Scratch. All rights reserved.</p>
-    </footer>
-
+    <!-- Scripts -->
     <script src="js/app.js"></script>
     <script src="js/scratch-card.js"></script>
 </body>
