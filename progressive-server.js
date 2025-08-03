@@ -5,7 +5,8 @@ const cors = require('cors');
 const path = require('path');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
-const authRoutes = require('./routes/auth'); // ADDED
+const authRoutes = require('./routes/auth');
+const adminRoutes = require('./routes/admin'); // ADDED admin routes import
 
 // Load environment variables
 dotenv.config();
@@ -44,14 +45,26 @@ app.use(session({
     }
 }));
 
+// Authentication middleware
+const checkAuth = (req, res, next) => {
+    if (req.session && req.session.user) {
+        return next();
+    }
+    return res.status(401).json({
+        success: false,
+        message: 'Unauthorized. Please log in.'
+    });
+};
+
 // Routes
-app.use('/api/auth', authRoutes); // ADDED
+app.use('/api/auth', authRoutes);
+app.use('/api/admin', checkAuth, adminRoutes); // ADDED admin routes with auth check
 
 // Minimal route
 app.get('/', (req, res) => {
   res.json({
     status: 'success',
-    message: 'POP Scratch Card API is running - Auth routes added'
+    message: 'POP Scratch Card API is running - Auth and Admin routes added'
   });
 });
 
