@@ -5,7 +5,12 @@ const cors = require('cors');
 const path = require('path');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
+
+// Import all routes
 const authRoutes = require('./routes/auth');
+const ticketRoutes = require('./routes/tickets');
+const userRoutes = require('./routes/user');
+const scratchCardRoutes = require('./routes/scratch-cards');
 
 // Load environment variables
 dotenv.config();
@@ -92,6 +97,9 @@ app.use(session({
 
 // API Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/tickets', ticketRoutes);
+app.use('/api/user', userRoutes);
+app.use('/api/scratch-cards', scratchCardRoutes);
 
 // Serve index.html for root path
 app.get('/', (req, res) => {
@@ -102,7 +110,14 @@ app.get('/', (req, res) => {
 app.get('/api', (req, res) => {
     res.json({
         status: 'success',
-        message: 'POP Scratch Card API is running - Auth routes added'
+        message: 'POP Scratch Card API is running - All routes added',
+        timestamp: new Date().toISOString(),
+        routes: [
+            '/api/auth',
+            '/api/tickets',
+            '/api/user',
+            '/api/scratch-cards'
+        ]
     });
 });
 
@@ -136,6 +151,12 @@ app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
     console.log(`Public directory: ${path.join(__dirname, 'public')}`);
     console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`Server date: ${new Date().toISOString()}`);
+    console.log('Routes registered:');
+    console.log('- /api/auth');
+    console.log('- /api/tickets');
+    console.log('- /api/user');
+    console.log('- /api/scratch-cards');
 });
 
 module.exports = app;
