@@ -2,10 +2,10 @@
   "name": "popscratch",
   "version": "1.0.0",
   "description": "A digital scratch card platform where users can redeem tickets earned from POP gaming platforms and win exciting prizes.",
-  "main": "progressive-server.js",
+  "main": "server.js",
   "scripts": {
-    "start": "node progressive-server.js",
-    "dev": "nodemon progressive-server.js"
+    "start": "node server.js",
+    "dev": "nodemon server.js"
   },
   "keywords": [],
   "author": "",
