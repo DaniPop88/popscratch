@@ -1,8 +1,10 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
-const cors = require('cors');            // ADDED
-const path = require('path');            // ADDED
+const cors = require('cors');
+const path = require('path');
+const session = require('express-session');
+const MongoStore = require('connect-mongo');
 
 // Load environment variables
 dotenv.config();
@@ -21,20 +23,35 @@ mongoose.connect(process.env.MONGODB_URI, {
 .catch(err => console.error('MongoDB connection error:', err));
 
 // Core middleware
-app.use(cors());                         // ADDED
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, 'public'))); // ADDED
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Session configuration
+app.use(session({
+    secret: process.env.SESSION_SECRET || 'popscratch-secret-key',
+    resave: false,
+    saveUninitialized: false,
+    store: MongoStore.create({ 
+        mongoUrl: process.env.MONGODB_URI,
+        collectionName: 'sessions'
+    }),
+    cookie: {
+        maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
+        secure: process.env.NODE_ENV === 'production'
+    }
+}));
 
 // Minimal route
 app.get('/', (req, res) => {
   res.json({
     status: 'success',
-    message: 'POP Scratch Card API is running - Core middleware added'
+    message: 'POP Scratch Card API is running - Session management added'
   });
 });
 
-// Error handling middleware - ADDED
+// Error handling middleware
 app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).json({
