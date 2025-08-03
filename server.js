@@ -1,25 +1,14 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const dotenv = require('dotenv');
 const cors = require('cors');
 const path = require('path');
-const dotenv = require('dotenv');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
+const authRoutes = require('./routes/auth'); // ADDED
 
 // Load environment variables
 dotenv.config();
-
-// Import routes
-const authRoutes = require('./routes/auth');
-const ticketRoutes = require('./routes/tickets');
-const prizeRoutes = require('./routes/prizes');
-const adminRoutes = require('./routes/admin');
-const scratchCardRoutes = require('./routes/scratchCards');
-
-// Import middleware
-const { checkAuth } = require('./middleware/auth');
-const { logActivity } = require('./middleware/logger');
-const { debugMiddleware } = require('./middleware/debug');
 
 // Initialize Express app
 const app = express();
@@ -34,7 +23,7 @@ mongoose.connect(process.env.MONGODB_URI, {
 .then(() => console.log('Connected to MongoDB'))
 .catch(err => console.error('MongoDB connection error:', err));
 
-// Middleware
+// Core middleware
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -55,29 +44,16 @@ app.use(session({
     }
 }));
 
-// Activity logger middleware
-app.use(logActivity);
-
-// Debug middleware - nonaktifkan sementara
-// app.use(debugMiddleware);
-
 // Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/tickets', checkAuth, ticketRoutes);
-app.use('/api/prizes', checkAuth, prizeRoutes);
-app.use('/api/scratch-cards', scratchCardRoutes);
-app.use('/api/admin', checkAuth, adminRoutes);
+app.use('/api/auth', authRoutes); // ADDED
 
-app.get('/git-new', (req, res) => {
-    res.send('Git new route');
+// Minimal route
+app.get('/', (req, res) => {
+  res.json({
+    status: 'success',
+    message: 'POP Scratch Card API is running - Auth routes added'
+  });
 });
-
-// Serve frontend in production
-if (process.env.NODE_ENV === 'production') {
-    app.get('*', (req, res) => {
-        res.sendFile(path.join(__dirname, 'public', 'index.html'));
-    });
-}
 
 // Error handling middleware
 app.use((err, req, res, next) => {
