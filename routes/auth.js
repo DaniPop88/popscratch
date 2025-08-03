@@ -5,12 +5,18 @@ const { checkAuth } = require('../middleware/auth');
 const crypto = require('crypto');
 
 // Function to validate Telegram auth data
-function validateTelegramAuth(data, botToken) {
+function validateTelegramData(data) {
+  if (!data || !data.hash || !data.id || !data.auth_date) {
+    console.error('Missing required Telegram data fields');
+    return false;
+  }
+  
   // Check if auth_date is expired (24 hours)
   const authDate = parseInt(data.auth_date);
   const currentTime = Math.floor(Date.now() / 1000);
   if (currentTime - authDate > 86400) {
-    return false; // Auth data expired
+    console.error('Telegram auth data expired');
+    return false;
   }
   
   // Create a data check string by sorting all fields alphabetically
@@ -23,7 +29,7 @@ function validateTelegramAuth(data, botToken) {
   // Create a secret key by hashing the bot token with SHA-256
   const secretKey = crypto
     .createHash('sha256')
-    .update(botToken)
+    .update(process.env.TELEGRAM_BOT_TOKEN)
     .digest();
   
   // Calculate hash using HMAC-SHA-256
@@ -33,7 +39,11 @@ function validateTelegramAuth(data, botToken) {
     .digest('hex');
   
   // Verify that the hash we calculated matches the hash provided by Telegram
-  return hash === data.hash;
+  const isValid = hash === data.hash;
+  if (!isValid) {
+    console.error('Telegram hash validation failed');
+  }
+  return isValid;
 }
 
 // Register new user
@@ -163,70 +173,90 @@ router.get('/check', (req, res) => {
   });
 });
 
+// Check session route (new)
+router.get('/check-session', (req, res) => {
+  if (req.session && req.session.user) {
+    return res.json({
+      success: true,
+      isLoggedIn: true,
+      user: req.session.user
+    });
+  } else {
+    return res.json({
+      success: true,
+      isLoggedIn: false
+    });
+  }
+});
+
 // Telegram auth callback
 router.get('/telegram-callback', async (req, res) => {
   try {
     const telegramData = req.query;
     
-    // Validate Telegram authentication data
+    // Validate Telegram data
     if (!process.env.TELEGRAM_BOT_TOKEN) {
       console.error('TELEGRAM_BOT_TOKEN is not defined in environment variables');
       return res.redirect('/?login=error&reason=config');
     }
     
-    // Validate the data from Telegram
-    if (!validateTelegramAuth(telegramData, process.env.TELEGRAM_BOT_TOKEN)) {
-      console.error('Telegram auth validation failed');
-      return res.redirect('/?login=error&reason=validation');
+    if (!validateTelegramData(telegramData)) {
+      console.error('Invalid Telegram authentication data');
+      return res.redirect('/?login=error&reason=invalid_auth');
     }
     
-    // Extract user data
-    const { id, first_name, last_name, username, photo_url, auth_date } = telegramData;
+    // Check if user exists
+    let user = await User.findOne({ telegramId: telegramData.id.toString() });
     
-    // Find or create user
-    let user = await User.findOne({ telegramId: id });
-    
-    if (user) {
-      // Update existing user
-      user.firstName = first_name;
-      user.lastName = last_name || '';
-      user.username = username || user.username; // Keep existing username if not provided
-      user.photoUrl = photo_url || user.photoUrl;
-      user.lastLogin = new Date();
-      
-      await user.save();
-    } else {
+    if (!user) {
       // Create new user
       user = new User({
-        telegramId: id,
-        firstName: first_name,
-        lastName: last_name || '',
-        username: username || `tg_user_${id}`, // Generate username if not provided
-        photoUrl: photo_url || '',
-        gameIds: [],
+        telegramId: telegramData.id.toString(),
+        username: telegramData.username || '',
+        firstName: telegramData.first_name || '',
+        lastName: telegramData.last_name || '',
+        photoUrl: telegramData.photo_url || '',
         tickets: 0,
         isActive: true,
+        gameIds: [],
         lastLogin: new Date()
       });
       
       await user.save();
+      console.log('Created new user:', user.telegramId);
+    } else {
+      // Update existing user data
+      user.username = telegramData.username || user.username;
+      user.firstName = telegramData.first_name || user.firstName;
+      user.lastName = telegramData.last_name || user.lastName;
+      user.photoUrl = telegramData.photo_url || user.photoUrl;
+      user.lastLogin = new Date();
+      
+      await user.save();
+      console.log('Updated existing user:', user.telegramId);
     }
     
-    // Set user in session
+    // IMPORTANT: Set session properly
     req.session.user = {
       id: user._id,
       telegramId: user.telegramId,
       firstName: user.firstName,
-      username: user.username,
+      photoUrl: user.photoUrl,
       isAdmin: user.isAdmin || false
     };
     
-    // Redirect to dashboard with success
-    res.redirect('/?login=success');
-    
+    // Make sure session is saved before redirecting
+    req.session.save(err => {
+      if (err) {
+        console.error('Session save error:', err);
+        return res.redirect('/?login=error&reason=session_error');
+      }
+      console.log('Session saved successfully');
+      return res.redirect('/?login=success');
+    });
   } catch (error) {
-    console.error('Error in telegram-callback:', error);
-    res.redirect('/?login=error&reason=server');
+    console.error('Error in Telegram callback:', error);
+    return res.redirect('/?login=error&reason=server_error');
   }
 });
 
