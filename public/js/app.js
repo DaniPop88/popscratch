@@ -11,11 +11,29 @@ document.addEventListener('DOMContentLoaded', function() {
     const ticketsCount = document.getElementById('ticketsCount');
     const welcomeSection = document.getElementById('welcomeSection');
     const dashboardSection = document.getElementById('dashboardSection');
+    const prizesSection = document.getElementById('prizesSection');
+    const historySection = document.getElementById('historySection');
+    const profileSection = document.getElementById('profileSection');
     const scratchGameSection = document.getElementById('scratchGameSection');
     const getTicketBtn = document.getElementById('getTicketBtn');
     const backToDashboard = document.getElementById('backToDashboard');
     const historyContainer = document.getElementById('historyContainer');
     const cardTypeLabel = document.getElementById('cardTypeLabel');
+    
+    // Profile Elements
+    const profileAvatar = document.getElementById('profileAvatar');
+    const profileName = document.getElementById('profileName');
+    const profileTelegramId = document.getElementById('profileTelegramId');
+    const gameIdsList = document.getElementById('gameIdsList');
+    const addGameIdBtn = document.getElementById('addGameIdBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const viewClaimHistory = document.getElementById('viewClaimHistory');
+    
+    // Method info elements
+    const rechargeInfo = document.getElementById('rechargeInfo');
+    const vipInfo = document.getElementById('vipInfo');
+    const bettingInfo = document.getElementById('bettingInfo');
+    const inviteInfo = document.getElementById('inviteInfo');
     
     // Modals
     const modals = document.querySelectorAll('.modal');
@@ -24,6 +42,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const winPrizeModal = document.getElementById('winPrizeModal');
     const loseModal = document.getElementById('loseModal');
     const requestSentModal = document.getElementById('requestSentModal');
+    const viewPrizeModal = document.getElementById('viewPrizeModal');
     
     // Forms
     const gameIdForm = document.getElementById('gameIdForm');
@@ -60,6 +79,18 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Nav Items for Bottom Navigation
     const navItems = document.querySelectorAll('.nav-item');
+
+    // Banner Slider
+    const bannerSlides = document.querySelectorAll('.banner-slide');
+    const bannerDots = document.querySelectorAll('.dot');
+    let currentSlide = 0;
+    let bannerInterval;
+
+    // Prize Buttons
+    const btnPrizes = document.querySelectorAll('.btn-prizes');
+    const prizeCategories = document.querySelectorAll('.prize-categories .category');
+    const prizesList = document.querySelectorAll('.prizes-list');
+    const closePrizeModal = document.querySelector('.close-prize-modal');
 
     // User State
     let currentUser = null;
@@ -162,11 +193,67 @@ document.addEventListener('DOMContentLoaded', function() {
             window.history.replaceState({}, document.title, '/');
         }
         
+        // Initialize Banner Slider
+        startBannerSlider();
+        
         // Initialize Winners Carousel
         startWinnersCarousel();
         
         // Add event listeners
         addEventListeners();
+    }
+    
+    // Start Banner Slider
+    function startBannerSlider() {
+        // Hide all slides except the first one
+        bannerSlides.forEach((slide, index) => {
+            if (index !== 0) {
+                slide.classList.add('hidden');
+            }
+        });
+        
+        // Set the first dot as active
+        bannerDots.forEach((dot, index) => {
+            if (index === 0) {
+                dot.classList.add('active');
+            } else {
+                dot.classList.remove('active');
+            }
+        });
+        
+        // Start automatic slideshow
+        bannerInterval = setInterval(() => {
+            nextSlide();
+        }, 5000);
+        
+        // Add click event to dots
+        bannerDots.forEach((dot, index) => {
+            dot.addEventListener('click', () => {
+                clearInterval(bannerInterval);
+                showSlide(index);
+                bannerInterval = setInterval(() => {
+                    nextSlide();
+                }, 5000);
+            });
+        });
+    }
+    
+    function nextSlide() {
+        const nextIndex = (currentSlide + 1) % bannerSlides.length;
+        showSlide(nextIndex);
+    }
+    
+    function showSlide(index) {
+        // Hide current slide
+        bannerSlides[currentSlide].classList.add('hidden');
+        bannerDots[currentSlide].classList.remove('active');
+        
+        // Show new slide
+        bannerSlides[index].classList.remove('hidden');
+        bannerDots[index].classList.add('active');
+        
+        // Update current slide index
+        currentSlide = index;
     }
     
     // Fetch user data from server
@@ -226,6 +313,32 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
         
+        // Prize Buttons
+        btnPrizes.forEach(button => {
+            button.addEventListener('click', () => {
+                const cardType = button.closest('.game-card').querySelector('.play-btn').getAttribute('data-card-type');
+                openPrizeModal(cardType);
+            });
+        });
+        
+        // Prize Categories
+        prizeCategories.forEach(category => {
+            category.addEventListener('click', () => {
+                // Remove active class from all categories
+                prizeCategories.forEach(cat => cat.classList.remove('active'));
+                // Add active class to clicked category
+                category.classList.add('active');
+                
+                // Show corresponding prizes list
+                const cardType = category.getAttribute('data-card');
+                prizesList.forEach(list => list.classList.add('hidden'));
+                document.getElementById(`prizesList${cardType}`).classList.remove('hidden');
+            });
+        });
+        
+        // Close Prize Modal
+        if (closePrizeModal) closePrizeModal.addEventListener('click', () => closeModal(viewPrizeModal));
+        
         // Modal Close Buttons
         closeModalButtons.forEach(button => {
             button.addEventListener('click', () => {
@@ -245,6 +358,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (e.target === this) closeModal(this);
             });
         });
+        
+        // Profile Buttons
+        if (addGameIdBtn) addGameIdBtn.addEventListener('click', () => openModal(registerGameIdModal));
+        if (logoutBtn) logoutBtn.addEventListener('click', handleLogout);
+        if (viewClaimHistory) viewClaimHistory.addEventListener('click', () => showSection('history'));
         
         // Ensure bottom navigation works
         document.querySelectorAll('.bottom-nav .nav-item').forEach(navItem => {
@@ -326,6 +444,9 @@ document.addEventListener('DOMContentLoaded', function() {
                                 userGameIds = idsData.gameIds || {};
                                 console.log("User game IDs loaded:", userGameIds);
                                 
+                                // Update profile game IDs list
+                                updateGameIdsList();
+                                
                                 // If no game IDs registered, show the Game ID modal
                                 if (Object.keys(userGameIds).length === 0) {
                                     console.log("No Game IDs registered, showing modal");
@@ -343,6 +464,117 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error('Error checking auth status:', error);
                 showWelcomeScreen();
             });
+    }
+    
+    // Update Game IDs list in profile
+    function updateGameIdsList() {
+        if (!gameIdsList) return;
+        
+        // Clear the list
+        gameIdsList.innerHTML = '';
+        
+        // Check if user has any game IDs
+        if (Object.keys(userGameIds).length === 0) {
+            gameIdsList.innerHTML = '<div class="text-center text-gray-500">Belum ada Game ID terdaftar</div>';
+            return;
+        }
+        
+        // Add game IDs to the list
+        for (const platform in userGameIds) {
+            const gameIdItem = document.createElement('div');
+            gameIdItem.className = 'game-id-item';
+            gameIdItem.innerHTML = `
+                <div>
+                    <div class="game-id-platform">${platform}</div>
+                    <div class="game-id-value">${userGameIds[platform]}</div>
+                </div>
+                <button class="edit-game-id" data-platform="${platform}">Edit</button>
+            `;
+            gameIdsList.appendChild(gameIdItem);
+        }
+        
+        // Add event listeners to edit buttons
+        document.querySelectorAll('.edit-game-id').forEach(button => {
+            button.addEventListener('click', () => {
+                const platform = button.getAttribute('data-platform');
+                editGameId(platform, userGameIds[platform]);
+            });
+        });
+    }
+    
+    // Edit Game ID
+    function editGameId(platform, currentId) {
+        // Populate the form
+        platformSelect.value = platform;
+        gameId.value = currentId;
+        
+        // Disable platform selection since we're editing
+        platformSelect.disabled = true;
+        
+        // Show the modal
+        openModal(registerGameIdModal);
+        
+        // Update form submit handler for editing
+        gameIdForm.onsubmit = function(e) {
+            e.preventDefault();
+            
+            const newId = gameId.value.trim();
+            
+            if (!newId) {
+                showNotification('Silakan masukkan Game ID yang valid.', 'error');
+                return;
+            }
+            
+            // Show loading state
+            const submitBtn = gameIdForm.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Menyimpan...';
+            submitBtn.disabled = true;
+            
+            // Save game ID to server (still using the same endpoint)
+            fetch('/api/user/game-id', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ platform, gameId: newId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Reset button
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+                
+                if (data.success) {
+                    // Update local game IDs
+                    userGameIds[platform] = newId;
+                    
+                    // Close modal and update UI
+                    closeModal(registerGameIdModal);
+                    updateGameIdsList();
+                    
+                    // Show success notification
+                    showNotification('Game ID berhasil diperbarui!', 'success');
+                } else {
+                    showNotification(data.message || 'Gagal menyimpan Game ID. Silakan coba lagi.', 'error');
+                }
+            })
+            .catch(error => {
+                // Reset button
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+                
+                console.error('Error saving game ID:', error);
+                showNotification('Terjadi kesalahan. Silakan coba lagi.', 'error');
+            })
+            .finally(() => {
+                // Re-enable platform selection for future adds
+                platformSelect.disabled = false;
+                
+                // Reset form submit handler
+                gameIdForm.onsubmit = handleGameIdSubmit;
+            });
+        };
     }
     
     // Improved handleLogin function
@@ -373,6 +605,34 @@ document.addEventListener('DOMContentLoaded', function() {
         }, false);
     }
     
+    // Handle logout
+    function handleLogout() {
+        fetch('/api/auth/logout', {
+            method: 'POST'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Clear user data
+                currentUser = null;
+                userTickets = 0;
+                userGameIds = {};
+                
+                // Show welcome screen
+                showWelcomeScreen();
+                
+                // Show notification
+                showNotification('Logout berhasil', 'success');
+            } else {
+                showNotification('Gagal logout. Silakan coba lagi.', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error logging out:', error);
+            showNotification('Terjadi kesalahan. Silakan coba lagi.', 'error');
+        });
+    }
+    
     // Improved updateUIForLoggedUser function
     function updateUIForLoggedUser() {
         console.log("Updating UI for logged user");
@@ -381,6 +641,11 @@ document.addEventListener('DOMContentLoaded', function() {
         if (userName) userName.textContent = `${currentUser.firstName} ${currentUser.lastName || ''}`;
         if (userAvatar) userAvatar.src = currentUser.photoUrl || 'images/default-avatar.png';
         if (ticketsCount) ticketsCount.textContent = userTickets;
+        
+        // Update profile information
+        if (profileAvatar) profileAvatar.src = currentUser.photoUrl || 'images/default-avatar.png';
+        if (profileName) profileName.textContent = `${currentUser.firstName} ${currentUser.lastName || ''}`;
+        if (profileTelegramId) profileTelegramId.textContent = `@${currentUser.username || currentUser.telegramId}`;
         
         // Show/hide elements - make sure these elements exist before modifying
         if (userInfo) userInfo.classList.remove('hidden');
@@ -415,11 +680,14 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function showWelcomeScreen() {
         // Show welcome screen for non-logged users
-        userInfo.classList.add('hidden');
-        loginBtn.classList.remove('hidden');
-        welcomeSection.classList.remove('hidden');
-        dashboardSection.classList.add('hidden');
-        scratchGameSection.classList.add('hidden');
+        if (userInfo) userInfo.classList.add('hidden');
+        if (loginBtn) loginBtn.classList.remove('hidden');
+        if (welcomeSection) welcomeSection.classList.remove('hidden');
+        if (dashboardSection) dashboardSection.classList.add('hidden');
+        if (scratchGameSection) scratchGameSection.classList.add('hidden');
+        if (prizesSection) prizesSection.classList.add('hidden');
+        if (historySection) historySection.classList.add('hidden');
+        if (profileSection) profileSection.classList.add('hidden');
     }
     
     // Game ID Registration
@@ -461,6 +729,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Close modal and update UI
                 closeModal(registerGameIdModal);
                 updateUIForLoggedUser();
+                updateGameIdsList();
                 
                 // Show success notification
                 showNotification('Game ID berhasil disimpan!', 'success');
@@ -487,6 +756,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         populatePlatformSelect();
+        
+        // Reset method fields
+        methodRecharge.checked = true;
+        toggleMethodFields();
+        
         openModal(getTicketModal);
     }
     
@@ -520,19 +794,33 @@ document.addEventListener('DOMContentLoaded', function() {
         bettingFields.classList.add('hidden');
         inviteFields.classList.add('hidden');
         
+        // Hide all method info
+        rechargeInfo.classList.add('hidden');
+        vipInfo.classList.add('hidden');
+        bettingInfo.classList.add('hidden');
+        inviteInfo.classList.add('hidden');
+        
         // Show the selected method fields with animation
         if (methodRecharge && methodRecharge.checked) {
             rechargeFields.classList.remove('hidden');
+            rechargeInfo.classList.remove('hidden');
             animateElement(rechargeFields);
+            animateElement(rechargeInfo);
         } else if (methodVIP && methodVIP.checked) {
             vipFields.classList.remove('hidden');
+            vipInfo.classList.remove('hidden');
             animateElement(vipFields);
+            animateElement(vipInfo);
         } else if (methodBetting && methodBetting.checked) {
             bettingFields.classList.remove('hidden');
+            bettingInfo.classList.remove('hidden');
             animateElement(bettingFields);
+            animateElement(bettingInfo);
         } else if (methodInvite && methodInvite.checked) {
             inviteFields.classList.remove('hidden');
+            inviteInfo.classList.remove('hidden');
             animateElement(inviteFields);
+            animateElement(inviteInfo);
         }
     }
     
@@ -557,6 +845,39 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
+        // Get additional fields based on method
+        let requestData = { platform, method };
+        
+        if (method === 'recharge') {
+            const amount = document.getElementById('rechargeAmount').value;
+            const orderId = document.getElementById('rechargeOrderId').value;
+            if (!amount || !orderId) {
+                showNotification('Silakan isi jumlah recharge dan Order ID.', 'warning');
+                return;
+            }
+            requestData.amount = amount;
+            requestData.orderId = orderId;
+        } else if (method === 'vip') {
+            const vipLevel = document.getElementById('vipLevel').value;
+            requestData.vipLevel = vipLevel;
+        } else if (method === 'betting') {
+            const bettingAmount = document.getElementById('bettingAmount').value;
+            if (!bettingAmount) {
+                showNotification('Silakan isi jumlah betting.', 'warning');
+                return;
+            }
+            requestData.bettingAmount = bettingAmount;
+        } else if (method === 'invite') {
+            const inviteCount = document.getElementById('inviteCount').value;
+            const referralIds = document.getElementById('referralIds').value;
+            if (!inviteCount || !referralIds) {
+                showNotification('Silakan isi jumlah referral dan Referral IDs.', 'warning');
+                return;
+            }
+            requestData.inviteCount = inviteCount;
+            requestData.referralIds = referralIds;
+        }
+        
         // Show loading state
         const submitBtn = ticketRequestForm.querySelector('button[type="submit"]');
         const originalText = submitBtn.textContent;
@@ -569,7 +890,7 @@ document.addEventListener('DOMContentLoaded', function() {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ platform, method })
+            body: JSON.stringify(requestData)
         })
         .then(response => response.json())
         .then(data => {
@@ -583,6 +904,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // Add confetti effect
                 showConfetti();
+                
+                // Reset form
+                ticketRequestForm.reset();
+                
+                // Add to history
+                const historyEntry = {
+                    type: 'ticket',
+                    method: method,
+                    platform: platform,
+                    details: getMethodDetails(method, requestData),
+                    date: new Date()
+                };
+                addHistoryEntry(historyEntry);
             } else {
                 showNotification(data.message || 'Gagal mengirim permintaan tiket. Silakan coba lagi.', 'error');
             }
@@ -595,6 +929,33 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Error requesting tickets:', error);
             showNotification('Terjadi kesalahan. Silakan coba lagi.', 'error');
         });
+    }
+    
+    function getMethodDetails(method, data) {
+        switch (method) {
+            case 'recharge':
+                return `Deposit R$${data.amount}`;
+            case 'vip':
+                return `VIP Level ${data.vipLevel}`;
+            case 'betting':
+                return `Betting R$${data.bettingAmount}`;
+            case 'invite':
+                return `${data.inviteCount} Referrals`;
+            default:
+                return '';
+        }
+    }
+    
+    // Open Prize Modal
+    function openPrizeModal(cardType) {
+        // Set active tab to the selected card type
+        document.querySelectorAll('.prize-categories .category').forEach(cat => {
+            if (cat.getAttribute('data-card') === cardType) {
+                cat.click();
+            }
+        });
+        
+        openModal(viewPrizeModal);
     }
     
     // Game Play
@@ -666,7 +1027,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             // Initialize the scratch card
-            window.scratchCard = new ScratchCard('scratchCanvas', null, 50);
+            window.scratchCard = new ScratchCard('scratchCanvas', currentCardType, 50);
             
             // Set reveal callback
             window.scratchCard.onReveal = function(prize) {
@@ -707,229 +1068,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // ScratchCard Class
-    class ScratchCard {
-        constructor(canvasId, imageUrl, revealPercentage = 50) {
-            this.canvas = document.getElementById(canvasId);
-            if (!this.canvas) return;
-            
-            this.ctx = this.canvas.getContext('2d');
-            this.brush = new Image();
-            this.brush.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAMAAAC5zwKfAAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAAMAUExURUxpcWlrXXR0XYODZZSUbpmZcJmZcJubcZ6ecqGhdKKidKKidaOjdaSkdqWld6amd6amd6amd6endqendqendqend6ioeKmpd6mpd6mpeKmpeKqqeaqqeaureamreaurequreq2te62te62te62te62te62te66ufK+vfa+vfbCwfbCwfrGxf7Gxf7Gxf7GxgLKygLKygLOzgbS0grW1g7W1g7a2hLe3hbi4hbm5hrm5hrq6h7u7h7u7iLy8ib29ib29ib29ir6+ir6+ir6+i7+/jMDAjcHBjcLCjsPDj8TEj8XFkMXFkcbGkcbGkcbGksfHk8jIk8jIlMnJlcnJlcrKlsvLl8vLl8zMmMzMmMzMmM3Nmc7Oms/Pm8/Pm9DQnNDQnNDQnNHRndLSntLSntPTn9PTn9TTn9TUoNXVodbWotbWotfXo9jYpNjYpNjYpNjYpdjZpdjZpdjZpdjZpdnapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapdjapNgD+IgAAAP90Uk5TAAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8gISIjJCUmJygpKissLS4vMDEyMzQ1Njc4OTo7PD0+P0BBQkNERUZHSElKS0xNTk9QUVJTVFVWV1hZWltcXV5fYGFiY2RlZmdoaWprbG1ub3BxcnN0dXZ3eHl6e3x9fn+AgYKDhIWGh4iJiouMjY6PkJGSk5SVlpeYmZqbnJ2en6ChoqOkpaanqKmqq6ytrq+wsbKztLW2t7i5uru8vb6/wMHCw8TFxsfIycrLzM3Oz9DR0tPU1dbX2Nna29zd3t/g4eLj5OXm5+jp6uvs7e7v8PHy8/T19vf4+fr7/P3+/3yBxO0AAAPCSURBVGje7dn5PxVRFAfw2UkpJVuIkIQQWSohKm1IthAhEimSSiVF9kS2LNmyL9m3kH3fQva993vnDJpi5r1mzL36wz1/wcycc+/nfc97594z94EgWfSYDkRy9YuN8uVAJbv8u6NVAEbZs4jDMeA7KpzJscWXwlw8OiKcQboP+LPHx3A0udJnkwy+inN+EGbuQSE21ip4MYnH3C+SVtGM5QgCNZoW40m3gMW4UMhpOgx2WB7gsay+o6qynCqMvS8v2E5JUHaHlYWVA2zP5qRbn0Vg5tez18SjLUkwvBYKZjHYpr9xtLjYoOc2DqaP+5W+GmcxiqXl9L9Z5/NaHJP66HStV1/1qGQJZjHKzBVt3u9Kt/RZW7MsLVxbshhHp5WJ8+m29Has2K6rZHTShaSQfSw4wY3GJyK4qX2i6QijkwyNRCdsO9ZrBV3iy29DV/CUwlPHue3ZRvlTjB07WDGmkDR2G8CNaNgLJWyRXDxKAcoGMGCw+XsJ1kj2B2UOUGbDgMHnD6NoGrMPGw3AhgF0b+duoHgasx2rDMCCAUwowR04nMZsw3IDsGMALSpwJ46mMY3FApvkDKBSDS7HvjRmC5ZKOIATAzhThbtxKI3ZjDkGYMsADmvArTiaxmzCLF2wYQH11bgJB9OYjZipA3YQqkr7HVdhZxqzHjN0wR7C2UdcgC1pzFpM1wEHyGh/FF9hRRqzClNBgBURruVSLEpjVmASCHCEIMKXPeCFgRXG/8UMI/MZBoyC14ye4wGunUIlPKo0ZjnGgwCn8BwP8HDKGM9lm56rJhXjGo+HjP/jQYmGutFj01gJDzVDjJa+iYbLaCwbDSLcBivdGO1zUh0W9qexyHiIBSGejzKiM+dtMG7EmDQWkdQ6zVJwf7h5u6I4PMkTSS0zLSUXGJr3KzeOCMJoGrNkWGQrOc/Ukz/vXoN5DCL9rgvWFcfEdjbd0NyHsthMLI1lA6LbG5qggKOZiXEbMbp/c1NHY9XyAyxGO5vOEsxe2gaqKioq/7sGGBfxXcn3HXgTwhc1JZM0xNJYepFf+MlTlwUWG/DD+Se4HCOjiUzG+83+fU8GBi6DK9H6GE1kPJeKjpGxLAXXo36MJjKaP4tlHIvB9XgN/Zfxkx3huDTXY2i0KI05gtdRGstQoW1pzHHsj9FYBrHjNJZFXCTLOBaP+zGayGQhnuySZRzLwY9o/RM8ka2lG8tCrMVoIjPZWxqNJjJZDNfFMpnIJI6UyWKpzJbLZDaOxdJ4/AGUs+I5XgQOYQAAAABJRU5ErkJggg==';
-            this.imageUrl = imageUrl || this._createPrizeImage();
-            this.revealPercentage = revealPercentage;
-            this.isDrawing = false;
-            this.revealedPixels = 0;
-            this.totalPixels = this.canvas.width * this.canvas.height;
-            this.lastX = 0;
-            this.lastY = 0;
-            this.revealed = false;
-            this.prize = null;
-            this.onReveal = null;
-
-            this._init();
-        }
-
-        _init() {
-            this._createOverlay();
-            this._setupEventListeners();
-            this._generateRandomPrize();
-        }
-
-        _createOverlay() {
-            this.ctx.fillStyle = '#303030';  
-            this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-
-            // Add some scratch card effects
-            this.ctx.font = 'bold 24px Inter';
-            this.ctx.textAlign = 'center';
-            this.ctx.textBaseline = 'middle';
-            
-            // Add sparkles or design elements
-            for (let i = 0; i < 20; i++) {
-                const x = Math.random() * this.canvas.width;
-                const y = Math.random() * this.canvas.height;
-                const size = Math.random() * 3 + 1;
-                
-                this.ctx.fillStyle = `rgba(255, 255, 255, ${Math.random() * 0.3 + 0.1})`;
-                this.ctx.beginPath();
-                this.ctx.arc(x, y, size, 0, Math.PI * 2);
-                this.ctx.fill();
-            }
-
-            // Add text on the scratch area
-            this.ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-            this.ctx.fillText('Gesek Di Sini!', this.canvas.width / 2, this.canvas.height / 2);
-            
-            // Add border
-            this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
-            this.ctx.lineWidth = 3;
-            this.ctx.strokeRect(5, 5, this.canvas.width - 10, this.canvas.height - 10);
-        }
-
-        _setupEventListeners() {
-            const self = this;
-            
-            // Mouse Events
-            this.canvas.addEventListener('mousedown', function(e) {
-                self.isDrawing = true;
-                self.lastX = e.offsetX;
-                self.lastY = e.offsetY;
-            });
-            
-            this.canvas.addEventListener('mousemove', function(e) {
-                if (self.isDrawing) {
-                    self._handleDrawing(e.offsetX, e.offsetY);
-                }
-            });
-            
-            document.addEventListener('mouseup', function() {
-                self.isDrawing = false;
-            });
-
-            // Touch Events
-            this.canvas.addEventListener('touchstart', function(e) {
-                e.preventDefault();
-                const touch = e.touches[0];
-                const rect = self.canvas.getBoundingClientRect();
-                self.lastX = touch.clientX - rect.left;
-                self.lastY = touch.clientY - rect.top;
-                self.isDrawing = true;
-            });
-
-            this.canvas.addEventListener('touchmove', function(e) {
-                e.preventDefault();
-                if (self.isDrawing) {
-                    const touch = e.touches[0];
-                    const rect = self.canvas.getBoundingClientRect();
-                    const x = touch.clientX - rect.left;
-                    const y = touch.clientY - rect.top;
-                    self._handleDrawing(x, y);
-                }
-            });
-
-            this.canvas.addEventListener('touchend', function() {
-                self.isDrawing = false;
-            });
-        }
-
-        _handleDrawing(x, y) {
-            const ctx = this.ctx;
-            
-            ctx.globalCompositeOperation = 'destination-out';
-            ctx.lineWidth = 40;
-            ctx.lineJoin = 'round';
-            ctx.lineCap = 'round';
-            
-            ctx.beginPath();
-            ctx.moveTo(this.lastX, this.lastY);
-            ctx.lineTo(x, y);
-            ctx.stroke();
-            
-            // Calculate revealed area
-            this._calculateRevealedArea();
-            
-            // Update last position
-            this.lastX = x;
-            this.lastY = y;
-        }
-
-        _calculateRevealedArea() {
-            // Get image data to calculate transparent pixels
-            const imageData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
-            const pixels = imageData.data;
-            let transparentPixels = 0;
-            
-            for (let i = 3; i < pixels.length; i += 4) {
-                if (pixels[i] < 10) { // Almost transparent
-                    transparentPixels++;
-                }
-            }
-            
-            this.revealedPixels = transparentPixels;
-            const percentRevealed = (transparentPixels / this.totalPixels) * 100;
-            
-            // If revealed enough, show the prize
-            if (percentRevealed > this.revealPercentage && !this.revealed) {
-                this.revealed = true;
-                this._revealPrize();
-            }
-        }
-
-        _revealPrize() {
-            // Update the prize text if available
-            if (prizeReveal) {
-                prizeReveal.innerHTML = this.prize ? 
-                    `<div class="prize-result">${this.prize.name}</div>` : 
-                    `<div class="prize-result lose">Coba lagi 😢</div>`;
-            }
-            
-            // Call onReveal callback if provided
-            if (typeof this.onReveal === 'function') {
-                this.onReveal(this.prize);
-            }
-        }
-
-        _generateRandomPrize() {
-            // Use the prize probabilities from the card type
-            let prizes;
-            
-            switch (currentCardType) {
-                case 'A':
-                    prizes = prizesTypeA;
-                    break;
-                case 'B':
-                    prizes = prizesTypeB;
-                    break;
-                case 'C':
-                    prizes = prizesTypeC;
-                    break;
-                default:
-                    prizes = prizesTypeA;
-            }
-            
-            // Sum of all probabilities
-            const totalProbability = prizes.reduce((sum, prize) => sum + prize.probability, 0);
-            
-            // Add "lose" option with a higher probability
-            const loseProbability = totalProbability * 2; // Making the lose chance higher
-            const randomValue = Math.random() * (totalProbability + loseProbability);
-            
-            if (randomValue > totalProbability) {
-                this.prize = null; // No prize (lose)
-                return;
-            }
-            
-            // Determine which prize was won
-            let cumulativeProbability = 0;
-            for (const prize of prizes) {
-                cumulativeProbability += prize.probability;
-                if (randomValue <= cumulativeProbability) {
-                    this.prize = prize;
-                    return;
-                }
-            }
-            
-            this.prize = null; // Fallback, should not happen
-        }
-
-        _createPrizeImage() {
-            // This would normally be a real image URL
-            return '';
-        }
-
-        reset() {
-            this.revealed = false;
-            this.revealedPixels = 0;
-            this._createOverlay();
-            this._generateRandomPrize();
-            
-            if (prizeReveal) {
-                prizeReveal.innerHTML = 'Gesek untuk melihat hadiah!';
-            }
-        }
-    }
-    
     function showDashboard() {
         scratchGameSection.classList.add('fade-out');
         setTimeout(() => {
@@ -956,7 +1094,13 @@ document.addEventListener('DOMContentLoaded', function() {
     // Helper Functions
     function openModal(modal) {
         if (!modal) return;
-        modal.classList.remove('hidden');
+        
+        // Hide any visible modals first
+        document.querySelectorAll('.modal.show').forEach(m => {
+            m.classList.remove('show');
+        });
+        
+        modal.classList.add('show');
         modal.classList.add('fade-in');
         setTimeout(() => {
             modal.classList.remove('fade-in');
@@ -967,7 +1111,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!modal) return;
         modal.classList.add('fade-out');
         setTimeout(() => {
-            modal.classList.add('hidden');
+            modal.classList.remove('show');
             modal.classList.remove('fade-out');
         }, 300);
     }
@@ -1135,10 +1279,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function startWinnersCarousel() {
-        const container = document.querySelector('.winners-carousel-container');
+        const container = document.querySelector('.carousel-container');
         if (!container) return;
         
-        const items = container.querySelectorAll('.winner-item');
+        const items = container.querySelectorAll('.carousel-item');
         if (items.length === 0) return;
         
         // Clone items to create seamless loop
@@ -1205,7 +1349,7 @@ document.addEventListener('DOMContentLoaded', function() {
         } else if (item.type === 'ticket') {
             historyHTML = `
                 <div>
-                    <strong>${item.action}</strong>
+                    <strong>${capitalizeFirstLetter(item.method)}</strong>
                     <div>${item.details}</div>
                 </div>
                 <div class="history-date">${formattedDate}</div>
@@ -1226,6 +1370,10 @@ document.addEventListener('DOMContentLoaded', function() {
         setTimeout(() => {
             historyItem.classList.remove('fade-in');
         }, 500);
+    }
+    
+    function capitalizeFirstLetter(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
     }
     
     // Initialize the app
@@ -1442,6 +1590,285 @@ document.addEventListener('DOMContentLoaded', function() {
             .welcome-content {
                 font-size: 18px;
                 font-weight: bold;
+            }
+            
+            /* Profile styles */
+            .profile-section {
+                padding: 20px;
+            }
+            
+            .profile-header {
+                display: flex;
+                align-items: center;
+                margin-bottom: 20px;
+            }
+            
+            .profile-avatar {
+                width: 80px;
+                height: 80px;
+                border-radius: 50%;
+                object-fit: cover;
+                border: 3px solid var(--accent-color);
+            }
+            
+            .profile-info {
+                margin-left: 20px;
+            }
+            
+            .profile-name {
+                font-size: 22px;
+                font-weight: bold;
+                margin-bottom: 5px;
+            }
+            
+            .profile-telegram-id {
+                color: var(--text-secondary);
+                font-size: 14px;
+            }
+            
+            .profile-section-title {
+                font-size: 18px;
+                font-weight: bold;
+                margin: 20px 0 10px;
+                display: flex;
+                align-items: center;
+            }
+            
+            .profile-section-title i {
+                margin-right: 8px;
+                color: var(--accent-color);
+            }
+            
+            .game-ids-container {
+                background-color: var(--card-bg);
+                border-radius: var(--border-radius);
+                padding: 15px;
+                margin-bottom: 20px;
+            }
+            
+            .game-id-item {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 10px 0;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            }
+            
+            .game-id-item:last-child {
+                border-bottom: none;
+            }
+            
+            .game-id-platform {
+                font-weight: bold;
+                margin-bottom: 4px;
+            }
+            
+            .game-id-value {
+                color: var(--text-secondary);
+                font-size: 14px;
+            }
+            
+            .edit-game-id {
+                background-color: rgba(255, 255, 255, 0.1);
+                color: var(--text-color);
+                border: none;
+                border-radius: 4px;
+                padding: 6px 12px;
+                font-size: 12px;
+                cursor: pointer;
+            }
+            
+            .add-game-id-btn {
+                background-color: var(--accent-color);
+                color: white;
+                border: none;
+                border-radius: var(--button-radius);
+                padding: 10px 15px;
+                font-size: 14px;
+                font-weight: bold;
+                display: flex;
+                align-items: center;
+                margin-top: 10px;
+                cursor: pointer;
+            }
+            
+            .add-game-id-btn i {
+                margin-right: 8px;
+            }
+            
+            .logout-btn {
+                background-color: transparent;
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                color: var(--text-color);
+                border-radius: var(--button-radius);
+                padding: 12px;
+                width: 100%;
+                font-size: 16px;
+                font-weight: bold;
+                cursor: pointer;
+                margin-top: 30px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            .logout-btn i {
+                margin-right: 8px;
+                color: #e74c3c;
+            }
+            
+            /* Prize display */
+            .prizes-modal-content {
+                height: 80vh;
+                display: flex;
+                flex-direction: column;
+            }
+            
+            .prize-categories {
+                display: flex;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                overflow-x: auto;
+                scrollbar-width: none;
+            }
+            
+            .prize-categories::-webkit-scrollbar {
+                display: none;
+            }
+            
+            .prize-categories .category {
+                padding: 12px 20px;
+                white-space: nowrap;
+                cursor: pointer;
+                position: relative;
+                color: var(--text-secondary);
+            }
+            
+            .prize-categories .category.active {
+                color: var(--accent-color);
+            }
+            
+            .prize-categories .category.active:after {
+                content: '';
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                height: 3px;
+                background-color: var(--accent-color);
+            }
+            
+            .prizes-list {
+                flex: 1;
+                overflow-y: auto;
+                padding: 15px;
+            }
+            
+            .prize-item {
+                display: flex;
+                align-items: center;
+                padding: 10px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            }
+            
+            .prize-icon {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                background-color: rgba(255, 255, 255, 0.1);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin-right: 15px;
+            }
+            
+            .prize-details {
+                flex: 1;
+            }
+            
+            .prize-name {
+                font-weight: bold;
+                margin-bottom: 4px;
+            }
+            
+            .prize-type {
+                font-size: 12px;
+                color: var(--text-secondary);
+            }
+            
+            .prize-probability {
+                font-size: 12px;
+                color: var(--accent-color);
+                background-color: var(--accent-light);
+                padding: 4px 8px;
+                border-radius: 12px;
+            }
+            
+            /* Ticket request info */
+            .method-info {
+                background-color: rgba(255, 255, 255, 0.05);
+                border-radius: var(--border-radius);
+                padding: 12px;
+                margin-top: 10px;
+                margin-bottom: 16px;
+                font-size: 14px;
+                color: var(--text-secondary);
+            }
+            
+            .method-info ul {
+                margin: 8px 0 0 20px;
+            }
+            
+            .method-info li {
+                margin-bottom: 6px;
+            }
+            
+            .method-info strong {
+                color: var(--accent-color);
+            }
+            
+            /* Banner slider */
+            .banner-slider {
+                position: relative;
+                border-radius: var(--border-radius);
+                overflow: hidden;
+                margin-bottom: 20px;
+            }
+            
+            .banner-slide {
+                width: 100%;
+                border-radius: var(--border-radius);
+                transition: opacity 0.5s;
+            }
+            
+            .banner-slide img {
+                width: 100%;
+                display: block;
+                border-radius: var(--border-radius);
+            }
+            
+            .banner-dots {
+                position: absolute;
+                bottom: 10px;
+                left: 0;
+                right: 0;
+                display: flex;
+                justify-content: center;
+                gap: 8px;
+            }
+            
+            .dot {
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                background-color: rgba(255, 255, 255, 0.5);
+                cursor: pointer;
+                transition: all 0.3s;
+            }
+            
+            .dot.active {
+                background-color: var(--accent-color);
+                transform: scale(1.2);
+                box-shadow: 0 0 10px var(--accent-light);
             }
         `;
         document.head.appendChild(styleEl);
