@@ -29,6 +29,14 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Tambahkan middleware untuk memperbaiki MIME Type CSS
+app.use((req, res, next) => {
+  if (req.path.endsWith('.css')) {
+    res.type('text/css');
+  }
+  next();
+});
+
 // Session configuration
 app.use(session({
     secret: process.env.SESSION_SECRET || 'popscratch-secret-key',
