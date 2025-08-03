@@ -93,6 +93,15 @@ app.use(session({
   }
 }));
 
+// Add this before your routes
+app.use((req, res, next) => {
+    if (req.path.includes('/api/auth/check-session')) {
+        console.log('Session check request received');
+        console.log('Session data:', req.session);
+    }
+    next();
+});
+
 // ===== ROUTES =====
 
 // API Routes
