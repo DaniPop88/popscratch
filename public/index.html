@@ -7,8 +7,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="/js/fix-styles.js"></script>
-    <!-- Original CSS link commented out -->
-    <!-- <link rel="stylesheet" href="/css/style.css"> -->
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/additional-styles.css">
     
     <!-- Inline CSS -->
     <style>
@@ -107,6 +107,44 @@
             height: auto;
             display: block;
             border-radius: var(--border-radius);
+        }
+
+        /* Banner Slider */
+        .banner-wrapper {
+            position: relative;
+            margin-bottom: 16px;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .banner-wrapper img {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: var(--border-radius);
+        }
+
+        .banner-dots {
+            position: absolute;
+            bottom: 10px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+        }
+
+        .dot.active {
+            background-color: var(--accent-color);
         }
 
         /* Winners Carousel */
@@ -513,12 +551,14 @@
             margin-bottom: 24px;
         }
 
-        #scratchCard {
+        #scratchCard, #scratchCanvas {
             position: absolute;
             top: 0;
             left: 0;
             border-radius: var(--border-radius);
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            height: 100%;
         }
 
         #prize-text {
@@ -657,28 +697,6 @@
         .telegram-login-button i {
             margin-right: 8px;
             font-size: 20px;
-        }
-
-        /* Media Queries */
-        @media (min-width: 600px) {
-            .claim-options {
-                grid-template-columns: repeat(4, 1fr);
-            }
-        }
-
-        @media (min-width: 768px) {
-            .container {
-                padding: 24px;
-            }
-            
-            .app-header {
-                padding: 0 24px;
-            }
-            
-            .game-cards {
-                display: grid;
-                grid-template-columns: repeat(2, 1fr);
-            }
         }
 
         /* User styles */
@@ -841,6 +859,367 @@
         .method-fields.hidden {
             display: none;
         }
+
+        /* Method info */
+        .method-info {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: var(--button-radius);
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .method-info.hidden {
+            display: none;
+        }
+
+        .method-info h4 {
+            color: var(--accent-color);
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .method-info p {
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        .method-info ul {
+            margin-left: 20px;
+            margin-bottom: 12px;
+        }
+
+        .method-info li {
+            font-size: 14px;
+            margin-bottom: 6px;
+        }
+
+        .method-note {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        /* Active tickets */
+        .active-tickets {
+            margin-top: 24px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .active-tickets h4 {
+            font-size: 16px;
+            margin-bottom: 12px;
+        }
+
+        .ticket-item {
+            background-color: rgba(255, 255, 255, 0.05);
+            padding: 8px 12px;
+            border-radius: var(--button-radius);
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        /* Prize categories */
+        .prize-categories {
+            display: flex;
+            overflow-x: auto;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 8px;
+        }
+
+        .category {
+            padding: 8px 16px;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            white-space: nowrap;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .category.active {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        /* Prize grid */
+        .prize-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .prize-item {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .prize-item img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+        }
+
+        .prize-name {
+            font-size: 16px;
+            font-weight: 600;
+            padding: 10px 12px 4px;
+        }
+
+        .prize-card {
+            font-size: 12px;
+            color: var(--text-secondary);
+            padding: 0 12px 10px;
+        }
+
+        /* Live winners feed */
+        .live-winners {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: var(--border-radius);
+            padding: 12px;
+            margin-bottom: 24px;
+        }
+
+        .winner-feed {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: var(--accent-color);
+        }
+
+        /* History filter */
+        .history-filter {
+            display: flex;
+            overflow-x: auto;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 8px;
+        }
+
+        .filter-tab {
+            padding: 8px 16px;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            white-space: nowrap;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .filter-tab.active {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        /* History list */
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .history-item {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .history-item .history-details {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 4px;
+        }
+
+        .history-item .history-result {
+            text-align: right;
+        }
+
+        .result-name {
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+
+        .result-code {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .result-status {
+            font-size: 12px;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .result-status.approved {
+            background-color: rgba(51, 204, 102, 0.2);
+            color: #33cc66;
+        }
+
+        .result-status.pending {
+            background-color: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+        }
+
+        .result-status.rejected {
+            background-color: rgba(255, 58, 94, 0.2);
+            color: var(--accent-color);
+        }
+
+        /* Profile styles */
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 2px solid var(--accent-color);
+        }
+
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-info {
+            flex: 1;
+        }
+
+        .profile-name {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .profile-telegram-id {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .profile-section-box {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .game-ids-list {
+            margin: 16px 0;
+        }
+
+        .game-id-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .game-id-item:last-child {
+            border-bottom: none;
+        }
+
+        .game-id-platform {
+            font-weight: 600;
+        }
+
+        .game-id-value {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .edit-game-id {
+            background-color: transparent;
+            border: none;
+            color: var(--accent-color);
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn-add-game-id {
+            width: 100%;
+            padding: 12px;
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--accent-color);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--button-radius);
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .settings-list {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .setting-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            color: var(--text-color);
+            text-decoration: none;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+
+        .setting-item i {
+            margin-right: 12px;
+            width: 20px;
+            text-align: center;
+            color: var(--accent-color);
+        }
+
+        /* Media Queries */
+        @media (min-width: 600px) {
+            .claim-options {
+                grid-template-columns: repeat(4, 1fr);
+            }
+
+            .prize-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (min-width: 768px) {
+            .container {
+                padding: 24px;
+            }
+            
+            .app-header {
+                padding: 0 24px;
+            }
+            
+            .game-cards {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .prize-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
     </style>
 
     <!-- Fallback inline styles script -->
@@ -910,9 +1289,16 @@
 
         <!-- Dashboard Section (For Logged Users) -->
         <section id="dashboardSection" class="dashboard-section hidden">
-            <!-- Main Banner for logged users -->
-            <div class="main-banner">
-                <img src="images/vip-banner.jpg" alt="VIP Rewards!">
+            <!-- Banner Slider -->
+            <div class="banner-wrapper">
+                <img src="images/banner1.jpg" alt="Banner 1" class="banner-slide">
+                <img src="images/banner2.jpg" alt="Banner 2" class="banner-slide hidden">
+                <img src="images/banner3.jpg" alt="Banner 3" class="banner-slide hidden">
+                <div class="banner-dots">
+                    <div class="dot active"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                </div>
             </div>
 
             <!-- Winners Carousel -->
@@ -1022,9 +1408,167 @@
                 <div id="scratchInstructions" class="scratch-instructions">
                     <p>Gosok kartu untuk melihat hadiahmu!</p>
                 </div>
-                <canvas id="scratchCard" width="300" height="300"></canvas>
-                <div id="prizeReveal" class="prize-reveal hidden">
+                <canvas id="scratchCanvas" width="300" height="300"></canvas>
+                <div id="prizeReveal" class="prize-reveal">
                     <!-- Prize will be revealed here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Prêmios Section -->
+        <section id="prizesSection" class="prizes-section hidden">
+            <div class="section-header">
+                <div class="section-title">
+                    <i class="fas fa-gift"></i> Prêmios
+                </div>
+            </div>
+            
+            <!-- Tab Categories -->
+            <div class="prize-categories">
+                <div class="category active">Semua</div>
+                <div class="category">Uang</div>
+                <div class="category">Elektronik</div>
+                <div class="category">Merchandise</div>
+                <div class="category">Lainnya</div>
+            </div>
+            
+            <!-- Prize Grid -->
+            <div class="prize-grid">
+                <div class="prize-item">
+                    <img src="images/prizes/iphone15.jpg" alt="iPhone 15">
+                    <div class="prize-name">iPhone 15</div>
+                    <div class="prize-card">Kupon C</div>
+                </div>
+                <div class="prize-item">
+                    <img src="images/prizes/smarttv.jpg" alt="Smart TV 4K">
+                    <div class="prize-name">Smart TV 4K</div>
+                    <div class="prize-card">Kupon C</div>
+                </div>
+                <div class="prize-item">
+                    <img src="images/prizes/jbl.jpg" alt="JBL Speaker">
+                    <div class="prize-name">JBL Speaker</div>
+                    <div class="prize-card">Kupon B</div>
+                </div>
+                <div class="prize-item">
+                    <img src="images/prizes/money1000.jpg" alt="R$1000">
+                    <div class="prize-name">R$1000</div>
+                    <div class="prize-card">Kupon A/B</div>
+                </div>
+                <div class="prize-item">
+                    <img src="images/prizes/airpods.jpg" alt="Airpods">
+                    <div class="prize-name">Airpods</div>
+                    <div class="prize-card">Kupon B</div>
+                </div>
+                <div class="prize-item">
+                    <img src="images/prizes/ps5.jpg" alt="PlayStation 5">
+                    <div class="prize-name">PlayStation 5</div>
+                    <div class="prize-card">Kupon C</div>
+                </div>
+            </div>
+            
+            <!-- Live Winners Feed -->
+            <div class="live-winners">
+                <div class="winner-feed">
+                    <i class="fas fa-trophy"></i> @rafaella baru menang JBL Speaker!
+                </div>
+            </div>
+        </section>
+
+        <!-- History Section -->
+        <section id="historySection" class="history-section hidden">
+            <div class="section-header">
+                <div class="section-title">
+                    <i class="fas fa-history"></i> History
+                </div>
+            </div>
+            
+            <!-- Tab Filter -->
+            <div class="history-filter">
+                <div class="filter-tab active">Semua</div>
+                <div class="filter-tab">Tiket</div>
+                <div class="filter-tab">Gosok Kartu</div>
+                <div class="filter-tab">Hadiah</div>
+            </div>
+            
+            <!-- History List -->
+            <div class="history-list">
+                <div class="history-item">
+                    <div class="history-details">
+                        <div class="history-date">03/08/2025 06:30</div>
+                        <div class="history-type">Scratch Card</div>
+                        <div class="history-platform">POPBRA</div>
+                    </div>
+                    <div class="history-result win">
+                        <div class="result-name">iPhone 15</div>
+                        <div class="result-code">PS78290A</div>
+                    </div>
+                </div>
+                
+                <div class="history-item">
+                    <div class="history-details">
+                        <div class="history-date">02/08/2025 14:22</div>
+                        <div class="history-type">Klaim Tiket</div>
+                        <div class="history-platform">POP888</div>
+                    </div>
+                    <div class="history-result">
+                        <div class="result-name">Deposit R$100</div>
+                        <div class="result-status approved">Approved</div>
+                    </div>
+                </div>
+                
+                <div class="history-item">
+                    <div class="history-details">
+                        <div class="history-date">01/08/2025 09:15</div>
+                        <div class="history-type">Scratch Card</div>
+                        <div class="history-platform">26BET</div>
+                    </div>
+                    <div class="history-result lose">
+                        <div class="result-name">Tidak Menang</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Profile Section -->
+        <section id="profileSection" class="profile-section hidden">
+            <div class="profile-header">
+                <div class="profile-avatar">
+                    <img id="profileAvatar" src="" alt="User Avatar">
+                </div>
+                <div class="profile-info">
+                    <div id="profileName" class="profile-name"></div>
+                    <div id="profileTelegramId" class="profile-telegram-id"></div>
+                </div>
+            </div>
+            
+            <!-- Game IDs Section -->
+            <div class="profile-section-box">
+                <div class="section-title">
+                    <i class="fas fa-gamepad"></i> Game IDs
+                </div>
+                <div id="gameIdsList" class="game-ids-list">
+                    <!-- Game IDs akan diisi secara dinamis -->
+                </div>
+                <button id="addGameIdBtn" class="btn-add-game-id">
+                    <i class="fas fa-plus"></i> Tambah Game ID
+                </button>
+            </div>
+            
+            <!-- Settings Section -->
+            <div class="profile-section-box">
+                <div class="section-title">
+                    <i class="fas fa-cog"></i> Pengaturan
+                </div>
+                <div class="settings-list">
+                    <a href="https://t.me/BKSPOP" class="setting-item" target="_blank">
+                        <i class="fas fa-headset"></i> Kontak Support
+                    </a>
+                    <a href="#" class="setting-item" id="viewClaimHistory">
+                        <i class="fas fa-history"></i> Riwayat Klaim
+                    </a>
+                    <a href="#" class="setting-item" id="logoutBtn">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
                 </div>
             </div>
         </section>
@@ -1039,9 +1583,9 @@
             <i class="fas fa-home"></i>
             <span>Home</span>
         </a>
-        <a href="#" class="nav-item" data-action="ticket">
-            <i class="fas fa-ticket-alt"></i>
-            <span>Ticket</span>
+        <a href="#" class="nav-item" data-section="history">
+            <i class="fas fa-history"></i>
+            <span>History</span>
         </a>
         <a href="#" class="nav-item main-action" data-action="register">
             <div class="action-button">
@@ -1101,7 +1645,7 @@
         </div>
     </div>
         
-    <!-- Get Ticket Modal -->
+    <!-- Get Ticket Modal - Updated with detailed info -->
     <div class="modal" id="getTicketModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -1114,7 +1658,7 @@
                         <label for="ticketPlatformSelect">Pilih Platform:</label>
                         <select id="ticketPlatformSelect" required>
                             <option value="">-- Pilih Platform --</option>
-                            <!-- Options will be filled with user's registered platforms -->
+                            <!-- Options akan diisi dari user registered platforms -->
                         </select>
                     </div>
                     
@@ -1152,11 +1696,66 @@
                         </div>
                     </div>
                     
+                    <!-- Info setiap metode -->
+                    <div class="method-info" id="rechargeInfo">
+                        <h4>RECHARGE (DEPOSIT)</h4>
+                        <p>Recharge di platform pilihan, setiap R$50 dapat 1 tiket.</p>
+                        <ul>
+                            <li>R$50 = 1 tiket</li>
+                            <li>R$100 = 2 tiket</li>
+                            <li>R$150 = 3 tiket</li>
+                        </ul>
+                        <p class="method-note">Hanya dihitung di hari yang sama saat request tiket.</p>
+                    </div>
+                    
+                    <div class="method-info hidden" id="vipInfo">
+                        <h4>CAPAI LEVEL VIP</h4>
+                        <p>Naikkan VIP Level di platform POP di hari yang sama.</p>
+                        <ul>
+                            <li>VIP 1 → 2 tiket</li>
+                            <li>VIP 2 → 3 tiket</li>
+                            <li>VIP 3 → 5 tiket</li>
+                            <li>VIP 4 → 8 tiket</li>
+                            <li>VIP 5 → 12 tiket</li>
+                        </ul>
+                        <p class="method-note">Harus naik VIP di hari yang sama dengan request.</p>
+                    </div>
+                    
+                    <div class="method-info hidden" id="bettingInfo">
+                        <h4>TOTAL BETTING / ROLLOVER</h4>
+                        <p>Kumpulkan total taruhan di platform dalam 1 hari.</p>
+                        <ul>
+                            <li>R$1.000 → 1 tiket</li>
+                            <li>R$2.000 → 2 tiket</li>
+                            <li>R$5.000 → 2 tiket</li>
+                            <li>R$10.000 → 5 tiket</li>
+                            <li>R$20.000 → 10 tiket</li>
+                        </ul>
+                        <p class="method-note">Total betting tercapai dalam 1 hari (00:00 – 23:59).</p>
+                    </div>
+                    
+                    <div class="method-info hidden" id="inviteInfo">
+                        <h4>INVITE MEMBER KE PLATFORM</h4>
+                        <p>Ajak teman dan dapatkan tiket.</p>
+                        <ul>
+                            <li>1 VALID REFERRAL → 1 tiket</li>
+                            <li>3 VALID REFERRAL → 2 tiket</li>
+                            <li>5 VALID REFERRAL → 3 tiket</li>
+                            <li>10 VALID REFERRAL → 5 tiket</li>
+                            <li>20 VALID REFERRAL → 8 tiket</li>
+                        </ul>
+                        <p class="method-note">Referral harus sudah deposit minimal 1x.</p>
+                    </div>
+                    
                     <!-- Dynamic Fields Containers -->
                     <div id="rechargeFields" class="method-fields">
                         <div class="form-group">
                             <label for="rechargeAmount">Jumlah Recharge (R$):</label>
                             <input type="number" id="rechargeAmount" min="50" step="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="rechargeOrderId">Order ID / No. Transaksi:</label>
+                            <input type="text" id="rechargeOrderId" placeholder="Masukkan Order ID deposit" required>
                         </div>
                     </div>
                     
@@ -1184,6 +1783,10 @@
                         <div class="form-group">
                             <label for="inviteCount">Jumlah Valid Referral:</label>
                             <input type="number" id="inviteCount" min="1" step="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="referralIds">Referral IDs (pisahkan dengan koma):</label>
+                            <input type="text" id="referralIds" placeholder="Contoh: ID1, ID2, ID3" required>
                         </div>
                     </div>
                     
@@ -1254,6 +1857,48 @@
                 <p>Harap tunggu, proses ini biasanya membutuhkan waktu 1-24 jam.</p>
                 
                 <button id="okBtn" class="btn-submit">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Prize Modal -->
+    <div class="modal" id="viewPrizeModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Daftar Hadiah</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="prize-categories">
+                    <div class="category active" data-card="A">Kupon A</div>
+                    <div class="category" data-card="B">Kupon B</div>
+                    <div class="category" data-card="C">Kupon C</div>
+                </div>
+                
+                <div id="prizesListA" class="prizes-list">
+                    <div class="prize-item-list">
+                        <div class="prize-name">R$1 - R$3000</div>
+                        <div class="prize-odds">Odds: Bervariasi</div>
+                    </div>
+                    <div class="prize-item-list">
+                        <div class="prize-name">PowerBank</div>
+                        <div class="prize-odds">Odds: Rendah</div>
+                    </div>
+                    <div class="prize-item-list">
+                        <div class="prize-name">Smart Watch</div>
+                        <div class="prize-odds">Odds: Rendah</div>
+                    </div>
+                </div>
+                
+                <div id="prizesListB" class="prizes-list hidden">
+                    <!-- Prizes for card B -->
+                </div>
+                
+                <div id="prizesListC" class="prizes-list hidden">
+                    <!-- Prizes for card C -->
+                </div>
+                
+                <button class="btn-submit close-prize-modal">Kembali</button>
             </div>
         </div>
     </div>
