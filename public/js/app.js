@@ -193,6 +193,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .catch(error => console.error('Error checking session:', error));
     }
     
+    // Updated event listeners function with improved bottom navigation
     function addEventListeners() {
         // Login Buttons
         if (loginBtn) loginBtn.addEventListener('click', handleLogin);
@@ -245,31 +246,65 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
         
-        // Bottom Nav Items
-        navItems.forEach(item => {
-            item.addEventListener('click', function() {
-                navItems.forEach(navItem => navItem.classList.remove('active'));
+        // Ensure bottom navigation works
+        document.querySelectorAll('.bottom-nav .nav-item').forEach(navItem => {
+            navItem.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                const action = this.getAttribute('data-action');
+                const section = this.getAttribute('data-section');
+                
+                console.log("Nav item clicked:", action || section);
+                
+                // Remove active class from all nav items
+                document.querySelectorAll('.bottom-nav .nav-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                
+                // Add active class to clicked item
                 this.classList.add('active');
                 
-                // Handle specific navigation actions
-                const action = this.getAttribute('data-action');
-                if (action === 'ticket') {
-                    openGetTicketModal();
-                } else if (action === 'register') {
+                if (action === 'register') {
                     openModal(registerGameIdModal);
+                } else if (action === 'ticket') {
+                    openGetTicketModal();
+                } else if (section) {
+                    showSection(section);
                 }
             });
         });
     }
     
-    // Login & Authentication - UPDATED FUNCTION
+    // New function to handle section switching
+    function showSection(sectionName) {
+        console.log("Showing section:", sectionName);
+        
+        // Hide all sections
+        const allSections = document.querySelectorAll('.container > section');
+        allSections.forEach(section => section.classList.add('hidden'));
+        
+        // Show requested section
+        const targetSection = document.getElementById(sectionName + 'Section');
+        if (targetSection) {
+            targetSection.classList.remove('hidden');
+        }
+    }
+    
+    // Improved checkLoginStatus function
     function checkLoginStatus() {
+        console.log("Checking login status...");
+        
         fetch('/api/auth/check-session')
             .then(response => response.json())
             .then(data => {
-                console.log('Session check response:', data);
+                console.log("Session check response:", data);
+                
                 if (data.success && data.isLoggedIn) {
+                    console.log("User is logged in:", data.user);
                     currentUser = data.user;
+                    
+                    // Update UI with real user data
+                    updateUIForLoggedUser();
                     
                     // Fetch ticket balance
                     fetch('/api/tickets/balance')
@@ -278,21 +313,29 @@ document.addEventListener('DOMContentLoaded', function() {
                             if (ticketData.success) {
                                 userTickets = ticketData.tickets;
                                 ticketsCount.textContent = userTickets;
-                                
-                                // Fetch user's game IDs
-                                fetch('/api/user/game-ids')
-                                    .then(response => response.json())
-                                    .then(idsData => {
-                                        if (idsData.success) {
-                                            userGameIds = idsData.gameIds || {};
-                                            updateUIForLoggedUser();
-                                        }
-                                    })
-                                    .catch(error => console.error('Error fetching game IDs:', error));
+                                console.log("User tickets loaded:", userTickets);
                             }
                         })
                         .catch(error => console.error('Error fetching tickets:', error));
+                    
+                    // Check if user has Game IDs registered
+                    fetch('/api/user/game-ids')
+                        .then(response => response.json())
+                        .then(idsData => {
+                            if (idsData.success) {
+                                userGameIds = idsData.gameIds || {};
+                                console.log("User game IDs loaded:", userGameIds);
+                                
+                                // If no game IDs registered, show the Game ID modal
+                                if (Object.keys(userGameIds).length === 0) {
+                                    console.log("No Game IDs registered, showing modal");
+                                    setTimeout(() => openModal(registerGameIdModal), 1000);
+                                }
+                            }
+                        })
+                        .catch(error => console.error('Error fetching game IDs:', error));
                 } else {
+                    console.log("User not logged in");
                     showWelcomeScreen();
                 }
             })
@@ -302,32 +345,48 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     }
     
+    // Improved handleLogin function
     function handleLogin() {
+        console.log("Initiating Telegram login...");
+        
         // Use the numeric bot ID (first part of the token before the colon)
-        const botId = '8360720049';
+        const botId = '8360720049'; // Ensure this matches your actual bot ID
         const callbackUrl = window.location.origin + '/api/auth/telegram-callback';
         const width = 550;
         const height = 470;
         
         const url = `https://oauth.telegram.org/auth?bot_id=${botId}&origin=${encodeURIComponent(window.location.origin)}&return_to=${encodeURIComponent(callbackUrl)}`;
         
+        console.log("Opening Telegram auth URL:", url);
+        
         // Open popup for login
         const left = (screen.width / 2) - (width / 2);
         const top = (screen.height / 2) - (height / 2);
         window.open(url, 'telegram-login', `width=${width},height=${height},left=${left},top=${top}`);
+        
+        // Add event listener for message from popup
+        window.addEventListener('message', function(event) {
+            if (event.data && event.data.type === 'telegram-login-success') {
+                console.log("Login success message received");
+                fetchUserData();
+            }
+        }, false);
     }
     
+    // Improved updateUIForLoggedUser function
     function updateUIForLoggedUser() {
-        // Update user info display
-        userName.textContent = `${currentUser.firstName} ${currentUser.lastName || ''}`;
-        userAvatar.src = currentUser.photoUrl || 'images/default-avatar.png';
-        ticketsCount.textContent = userTickets;
+        console.log("Updating UI for logged user");
         
-        // Show/hide elements
-        userInfo.classList.remove('hidden');
-        loginBtn.classList.add('hidden');
-        welcomeSection.classList.add('hidden');
-        dashboardSection.classList.remove('hidden');
+        // Update user info display
+        if (userName) userName.textContent = `${currentUser.firstName} ${currentUser.lastName || ''}`;
+        if (userAvatar) userAvatar.src = currentUser.photoUrl || 'images/default-avatar.png';
+        if (ticketsCount) ticketsCount.textContent = userTickets;
+        
+        // Show/hide elements - make sure these elements exist before modifying
+        if (userInfo) userInfo.classList.remove('hidden');
+        if (loginBtn) loginBtn.classList.add('hidden');
+        if (welcomeSection) welcomeSection.classList.add('hidden');
+        if (dashboardSection) dashboardSection.classList.remove('hidden');
         
         // Add welcome animation
         const userWelcome = document.createElement('div');
@@ -350,6 +409,8 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Load history
         loadHistory();
+        
+        console.log("UI updated for logged user");
     }
     
     function showWelcomeScreen() {
