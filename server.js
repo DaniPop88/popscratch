@@ -74,17 +74,18 @@ app.use('/images', (req, res, next) => {
 // ===== SESSION CONFIGURATION =====
 
 app.use(session({
-    secret: process.env.SESSION_SECRET || 'popscratch-secret-key',
-    resave: false,
-    saveUninitialized: false,
-    store: MongoStore.create({ 
-        mongoUrl: process.env.MONGODB_URI,
-        collectionName: 'sessions'
-    }),
-    cookie: {
-        maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
-        secure: process.env.NODE_ENV === 'production'
-    }
+  secret: process.env.SESSION_SECRET || 'popscratch-secret-key',
+  resave: false,
+  saveUninitialized: false,
+  store: MongoStore.create({ 
+    mongoUrl: process.env.MONGODB_URI,
+    collectionName: 'sessions'
+  }),
+  cookie: {
+    maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
+    secure: process.env.NODE_ENV === 'production' ? true : false,
+    sameSite: 'lax'
+  }
 }));
 
 // ===== ROUTES =====
