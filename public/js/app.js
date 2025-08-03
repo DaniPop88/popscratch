@@ -146,7 +146,18 @@ document.addEventListener('DOMContentLoaded', function() {
             // Clear the URL parameter
             window.history.replaceState({}, document.title, '/');
         } else if (loginStatus === 'error') {
-            showNotification('Login failed. Please try again.', 'error');
+            const reason = urlParams.get('reason') || '';
+            let errorMessage = 'Login failed. Please try again.';
+            
+            if (reason === 'invalid_auth') {
+                errorMessage = 'Invalid authentication data from Telegram.';
+            } else if (reason === 'session_error') {
+                errorMessage = 'Session creation failed. Please try again.';
+            } else if (reason === 'server_error') {
+                errorMessage = 'Server error occurred. Please try again later.';
+            }
+            
+            showNotification(errorMessage, 'error');
             // Clear the URL parameter
             window.history.replaceState({}, document.title, '/');
         }
@@ -251,13 +262,13 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Login & Authentication (keeping the existing implementation)
+    // Login & Authentication - UPDATED FUNCTION
     function checkLoginStatus() {
-        // Check session with server
-        fetch('/api/auth/check')
+        fetch('/api/auth/check-session')
             .then(response => response.json())
             .then(data => {
-                if (data.success && data.isAuthenticated) {
+                console.log('Session check response:', data);
+                if (data.success && data.isLoggedIn) {
                     currentUser = data.user;
                     
                     // Fetch ticket balance
@@ -266,6 +277,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         .then(ticketData => {
                             if (ticketData.success) {
                                 userTickets = ticketData.tickets;
+                                ticketsCount.textContent = userTickets;
                                 
                                 // Fetch user's game IDs
                                 fetch('/api/user/game-ids')
