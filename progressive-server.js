@@ -1,6 +1,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
+const cors = require('cors');            // ADDED
+const path = require('path');            // ADDED
 
 // Load environment variables
 dotenv.config();
@@ -18,18 +20,33 @@ mongoose.connect(process.env.MONGODB_URI, {
 .then(() => console.log('Connected to MongoDB'))
 .catch(err => console.error('MongoDB connection error:', err));
 
-// Basic middleware
+// Core middleware
+app.use(cors());                         // ADDED
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, 'public'))); // ADDED
 
 // Minimal route
 app.get('/', (req, res) => {
-  res.send('POP Scratch Card Progressive Server - With MongoDB');
+  res.json({
+    status: 'success',
+    message: 'POP Scratch Card API is running - Core middleware added'
+  });
+});
+
+// Error handling middleware - ADDED
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({
+        success: false,
+        message: 'Server error',
+        error: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
 });
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+    console.log(`Server running on port ${PORT}`);
 });
 
 module.exports = app;
