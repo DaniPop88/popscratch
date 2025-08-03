@@ -6,28 +6,34 @@ const crypto = require('crypto');
 
 // Function to validate Telegram auth data
 function validateTelegramAuth(data, botToken) {
-  // Create a data check string
-  const dataCheckArr = Object.entries(data)
-    .filter(([key]) => key !== 'hash')
+  // Check if auth_date is expired (24 hours)
+  const authDate = parseInt(data.auth_date);
+  const currentTime = Math.floor(Date.now() / 1000);
+  if (currentTime - authDate > 86400) {
+    return false; // Auth data expired
+  }
+  
+  // Create a data check string by sorting all fields alphabetically
+  const dataCheckString = Object.keys(data)
+    .filter(key => key !== 'hash')
     .sort()
-    .map(([key, value]) => `${key}=${value}`);
+    .map(key => `${key}=${data[key]}`)
+    .join('\n');
   
-  const dataCheckString = dataCheckArr.join('\n');
-  
-  // Create a secret key
+  // Create a secret key by hashing the bot token with SHA-256
   const secretKey = crypto
     .createHash('sha256')
     .update(botToken)
     .digest();
   
-  // Calculate hash
-  const hmac = crypto
+  // Calculate hash using HMAC-SHA-256
+  const hash = crypto
     .createHmac('sha256', secretKey)
     .update(dataCheckString)
     .digest('hex');
   
-  // Verify hash
-  return data.hash === hmac;
+  // Verify that the hash we calculated matches the hash provided by Telegram
+  return hash === data.hash;
 }
 
 // Register new user
@@ -160,26 +166,32 @@ router.get('/check', (req, res) => {
 // Telegram auth callback
 router.get('/telegram-callback', async (req, res) => {
   try {
-    // Data dari Telegram auth widget
-    const { id, first_name, last_name, username, photo_url, auth_date, hash } = req.query;
+    const telegramData = req.query;
     
-    // Validasi data
-    if (!validateTelegramAuth(req.query, process.env.TELEGRAM_BOT_TOKEN)) {
-      return res.status(401).json({ 
-        success: false, 
-        message: 'Invalid authentication data' 
-      });
+    // Validate Telegram authentication data
+    if (!process.env.TELEGRAM_BOT_TOKEN) {
+      console.error('TELEGRAM_BOT_TOKEN is not defined in environment variables');
+      return res.redirect('/?login=error&reason=config');
     }
     
-    // Check if user exists
+    // Validate the data from Telegram
+    if (!validateTelegramAuth(telegramData, process.env.TELEGRAM_BOT_TOKEN)) {
+      console.error('Telegram auth validation failed');
+      return res.redirect('/?login=error&reason=validation');
+    }
+    
+    // Extract user data
+    const { id, first_name, last_name, username, photo_url, auth_date } = telegramData;
+    
+    // Find or create user
     let user = await User.findOne({ telegramId: id });
     
     if (user) {
-      // Update user data
+      // Update existing user
       user.firstName = first_name;
       user.lastName = last_name || '';
-      user.username = username || '';
-      user.photoUrl = photo_url || '';
+      user.username = username || user.username; // Keep existing username if not provided
+      user.photoUrl = photo_url || user.photoUrl;
       user.lastLogin = new Date();
       
       await user.save();
@@ -189,10 +201,12 @@ router.get('/telegram-callback', async (req, res) => {
         telegramId: id,
         firstName: first_name,
         lastName: last_name || '',
-        username: username || '',
+        username: username || `tg_user_${id}`, // Generate username if not provided
         photoUrl: photo_url || '',
         gameIds: [],
-        tickets: 0
+        tickets: 0,
+        isActive: true,
+        lastLogin: new Date()
       });
       
       await user.save();
@@ -203,7 +217,8 @@ router.get('/telegram-callback', async (req, res) => {
       id: user._id,
       telegramId: user.telegramId,
       firstName: user.firstName,
-      isAdmin: user.isAdmin
+      username: user.username,
+      isAdmin: user.isAdmin || false
     };
     
     // Redirect to dashboard with success
@@ -211,7 +226,7 @@ router.get('/telegram-callback', async (req, res) => {
     
   } catch (error) {
     console.error('Error in telegram-callback:', error);
-    res.redirect('/?login=error');
+    res.redirect('/?login=error&reason=server');
   }
 });
 
