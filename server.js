@@ -35,13 +35,6 @@ app.use((req, res, next) => {
     console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
     next();
 });
-
-// TAMBAHKAN route CSS spesifik ini (sebelum app.use(express.static))
-app.get('/css/style.css', (req, res) => {
-  res.set({
-    'Content-Type': 'text/css',
-    'Cache-Control': 'public, max-age=86400' // Cache for 24 hours
-  });
   
   const cssPath = path.join(__dirname, 'public', 'css', 'style.css');
   res.sendFile(cssPath);
