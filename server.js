@@ -35,9 +35,12 @@ app.use((req, res, next) => {
     console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
     next();
 });
-  
-  const cssPath = path.join(__dirname, 'public', 'css', 'style.css');
-  res.sendFile(cssPath);
+
+// Route khusus untuk CSS files
+app.get('/css/style.css', (req, res) => {
+    const cssPath = path.join(__dirname, 'public', 'css', 'style.css');
+    res.set('Content-Type', 'text/css');
+    res.sendFile(cssPath);
 });
 
 // Perbaikan MIME type untuk CSS
