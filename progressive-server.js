@@ -5,6 +5,7 @@ const cors = require('cors');
 const path = require('path');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
+const authRoutes = require('./routes/auth'); // ADDED
 
 // Load environment variables
 dotenv.config();
@@ -43,11 +44,14 @@ app.use(session({
     }
 }));
 
+// Routes
+app.use('/api/auth', authRoutes); // ADDED
+
 // Minimal route
 app.get('/', (req, res) => {
   res.json({
     status: 'success',
-    message: 'POP Scratch Card API is running - Session management added'
+    message: 'POP Scratch Card API is running - Auth routes added'
   });
 });
 
