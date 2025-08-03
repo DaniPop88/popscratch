@@ -1,4 +1,5 @@
 const express = require('express');
+const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 
 // Load environment variables
@@ -8,21 +9,25 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Connect to MongoDB
+mongoose.connect(process.env.MONGODB_URI, {
+    ssl: true,
+    tls: true,
+    tlsAllowInvalidCertificates: true
+})
+.then(() => console.log('Connected to MongoDB'))
+.catch(err => console.error('MongoDB connection error:', err));
+
 // Basic middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Minimal route
 app.get('/', (req, res) => {
-  res.send('POP Scratch Card Progressive Server');
+  res.send('POP Scratch Card Progressive Server - With MongoDB');
 });
 
-// Error handler
-app.use((err, req, res, next) => {
-  console.error(err);
-  res.status(500).send('Something broke!');
-});
-
+// Start server
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
